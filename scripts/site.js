@@ -32,10 +32,8 @@
       if (destination) link.href = destination;
     });
 
-    const homeSection = document.querySelector("#home");
-    const syncCurrent = () => {
-      const atHome = window.location.hash === "#home"
-        || (!window.location.hash && window.scrollY < (homeSection?.offsetHeight || 1) * 0.55);
+    const syncCurrent = (sectionId = document.body.dataset.activeSection || window.location.hash.slice(1) || "home") => {
+      const atHome = sectionId === "home";
       document.querySelectorAll("[data-nav]").forEach((link) => {
         const active = (atHome && link.dataset.nav === "home") || (!atHome && link.dataset.nav === "work");
         if (active) link.setAttribute("aria-current", "page");
@@ -43,23 +41,149 @@
       });
     };
     window.addEventListener("hashchange", syncCurrent);
-    window.addEventListener("scroll", syncCurrent, { passive: true });
+    window.addEventListener("portfolio:sectionchange", (event) => syncCurrent(event.detail?.id));
     syncCurrent();
   }
 
-  function initParallax() {
-    const art = document.querySelector("[data-parallax]");
-    if (!art || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const offset = Math.min(window.scrollY * -0.08, 0);
-      art.style.setProperty("--hero-offset", `${offset}px`);
+  function initSectionPaging() {
+    const sections = ["home", "selected-motion", "other-works", "seasonal-posters"]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+    const nextButton = document.querySelector("[data-page-next]");
+    const nextLabel = document.querySelector("[data-page-next-label]");
+    const pageCount = document.querySelector("[data-page-count]");
+    if (sections.length === 0 || !nextButton || !nextLabel || !pageCount) return;
+
+    const track = document.querySelector("[data-page-track]");
+    if (!track) return;
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const initialIndex = sections.findIndex((section) => `#${section.id}` === window.location.hash);
+    let activeIndex = initialIndex >= 0 ? initialIndex : 0;
+    let locked = false;
+    let touchStart = null;
+    let transitionTimer = 0;
+    const transitionDuration = 760;
+
+    const sectionIndexFor = (id) => sections.findIndex((section) => section.id === id);
+
+    const setActiveA11y = (index) => {
+      sections.forEach((section, sectionIndex) => {
+        const active = sectionIndex === index;
+        section.setAttribute("aria-hidden", String(!active));
+        section.tabIndex = active ? 0 : -1;
+        section.inert = !active;
+      });
     };
-    window.addEventListener("scroll", () => {
-      if (!frame) frame = window.requestAnimationFrame(update);
+
+    const updateSwitcher = (index) => {
+      activeIndex = Math.max(0, Math.min(index, sections.length - 1));
+      const atEnd = activeIndex === sections.length - 1;
+      const destination = sections[atEnd ? 0 : activeIndex + 1];
+      pageCount.textContent = `${String(activeIndex + 1).padStart(2, "0")} / ${String(sections.length).padStart(2, "0")}`;
+      nextLabel.textContent = atEnd ? "BACK TO TOP" : "NEXT SECTION";
+      const arrow = nextButton.querySelector(".page-switcher-arrow");
+      if (arrow) arrow.textContent = atEnd ? "↑" : "↓";
+      const headingId = destination.getAttribute("aria-labelledby");
+      const heading = headingId ? document.getElementById(headingId) : null;
+      nextButton.setAttribute("aria-label", atEnd ? "Back to top" : `Go to ${heading?.textContent.trim() || destination.id}`);
+    };
+
+    const goTo = (index, { writeHistory = true } = {}) => {
+      const nextIndex = Math.max(0, Math.min(index, sections.length - 1));
+      if (nextIndex === activeIndex) {
+        updateSwitcher(nextIndex);
+        return;
+      }
+      if (locked) return;
+      locked = true;
+      activeIndex = nextIndex;
+      track.style.transform = `translate3d(0, -${activeIndex * 100}%, 0)`;
+      document.body.dataset.activeSection = sections[activeIndex].id;
+      setActiveA11y(activeIndex);
+      if (writeHistory) window.history.pushState(null, "", `#${sections[activeIndex].id}`);
+      updateSwitcher(nextIndex);
+      window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: sections[activeIndex].id, index: activeIndex } }));
+      window.clearTimeout(transitionTimer);
+      transitionTimer = window.setTimeout(() => { locked = false; }, motionPreference.matches ? 40 : transitionDuration);
+    };
+
+    nextButton.addEventListener("click", () => {
+      goTo(activeIndex === sections.length - 1 ? 0 : activeIndex + 1);
+    });
+
+    const handleWheel = (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey) return;
+      if (Math.abs(event.deltaY) < 16 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (target?.closest("input, textarea, select")) return;
+      event.preventDefault();
+      if (locked) return;
+      goTo(activeIndex + (event.deltaY > 0 ? 1 : -1));
+    };
+    window.addEventListener("wheel", handleWheel, { passive: false });
+
+    window.addEventListener("keydown", (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target && target !== document.body && target !== document.documentElement && !target.closest("[data-page-track]")) return;
+      if (["ArrowDown", "PageDown"].includes(event.key)) {
+        event.preventDefault();
+        goTo(activeIndex + 1);
+      } else if (["ArrowUp", "PageUp"].includes(event.key)) {
+        event.preventDefault();
+        goTo(activeIndex - 1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        goTo(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        goTo(sections.length - 1);
+      }
+    });
+
+    const navigateFromAnchor = (event) => {
+      const anchor = event.currentTarget;
+      const hash = new URL(anchor.href, window.location.href).hash.slice(1);
+      const index = sectionIndexFor(hash);
+      if (index < 0) return;
+      event.preventDefault();
+      goTo(index);
+    };
+    document.querySelectorAll("a[href*='#']").forEach((anchor) => anchor.addEventListener("click", navigateFromAnchor));
+
+    const applyHash = () => {
+      const index = sectionIndexFor(window.location.hash.slice(1));
+      if (index < 0) return;
+      locked = false;
+      goTo(index, { writeHistory: false });
+    };
+    window.addEventListener("hashchange", applyHash);
+    window.addEventListener("popstate", applyHash);
+
+    track.addEventListener("touchstart", (event) => {
+      if (event.touches.length !== 1) return;
+      touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY, target: event.target };
     }, { passive: true });
-    update();
+    track.addEventListener("touchend", (event) => {
+      if (!touchStart || event.changedTouches.length !== 1) return;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - touchStart.x;
+      const dy = touch.clientY - touchStart.y;
+      const horizontalTarget = touchStart.target instanceof Element
+        ? touchStart.target.closest(".motion-list, .other-grid, .seasonal-rail")
+        : null;
+      if (!horizontalTarget && Math.abs(dy) > 48 && Math.abs(dy) > Math.abs(dx) * 1.15) {
+        event.preventDefault();
+        goTo(activeIndex + (dy < 0 ? 1 : -1));
+      }
+      touchStart = null;
+    }, { passive: false });
+
+    track.style.transitionDuration = motionPreference.matches ? "0ms" : `${transitionDuration}ms`;
+    track.style.transform = `translate3d(0, -${activeIndex * 100}%, 0)`;
+    document.body.dataset.activeSection = sections[activeIndex].id;
+    setActiveA11y(activeIndex);
+    updateSwitcher(activeIndex);
+    window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: sections[activeIndex].id, index: activeIndex } }));
   }
 
   function renderMotionList() {
@@ -237,5 +361,5 @@
   renderSeasonalWorks();
   initMotion();
   initSeasonalPlayback();
-  initParallax();
+  initSectionPaging();
 })();

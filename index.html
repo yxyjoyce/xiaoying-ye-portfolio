@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Xiaoying Ye — Motion Graphics Designer and Animator.">
     <title>Xiaoying Ye — Portfolio</title>
-    <link rel="stylesheet" href="./styles/site.css?v=20260831-3">
+    <link rel="stylesheet" href="./styles/site.css?v=20260831-5">
   </head>
   <body data-page="home" data-root=".">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -21,8 +21,12 @@
         <p class="header-index" aria-hidden="true">01 — 05</p>
       </header>
 
-      <main id="main">
+      <div class="page-viewport">
+      <main id="main" data-page-track>
         <section class="hero" id="home" aria-labelledby="hero-title">
+          <div class="hero-background" aria-hidden="true">
+            <img src="./assets/images/hero-f26-background.png" alt="" width="4049" height="1080">
+          </div>
           <div class="hero-grid">
             <div class="hero-copy">
               <p class="hero-kicker">Animation Showreel</p>
@@ -36,12 +40,13 @@
               </a>
             </div>
 
-            <figure class="hero-art" data-parallax>
+            <figure class="hero-art">
               <div class="hero-art-frame">
                 <img src="./assets/images/poster-jingwei-reclamation.png" alt="Ink landscape from Jingwei Fill the Sea" width="1840" height="1035">
               </div>
               <figcaption><span class="accent-rule"></span><span>01 — 05</span></figcaption>
             </figure>
+
           </div>
           <div class="hero-corner hero-corner--left" aria-hidden="true"></div>
           <div class="hero-corner hero-corner--right" aria-hidden="true"></div>
@@ -50,7 +55,7 @@
         <section class="motion-section" id="selected-motion" aria-labelledby="motion-title">
           <div class="section-heading section-heading--dark">
             <div>
-              <p class="section-number">01 / 03</p>
+              <p class="section-number">02 / 04</p>
               <h2 id="motion-title">SELECTED <span>MOTION</span></h2>
             </div>
             <p class="section-intro">A selection of personal and<br>collaborative animation projects.</p>
@@ -98,7 +103,7 @@
         <section class="other-section" id="other-works" aria-labelledby="other-title">
           <div class="section-heading section-heading--paper">
             <div>
-              <p class="section-number">02 / 03</p>
+              <p class="section-number">03 / 04</p>
               <h2 id="other-title">OTHER <span>WORKS</span></h2>
               <p class="section-subtitle">其他类型作品</p>
             </div>
@@ -110,7 +115,7 @@
         <section class="seasonal-section" id="seasonal-posters" aria-labelledby="seasonal-title">
           <div class="section-heading section-heading--dark seasonal-heading">
             <div>
-              <p class="section-number">03 / 03</p>
+              <p class="section-number">04 / 04</p>
               <h2 id="seasonal-title">SEASONAL <span>POSTERS</span></h2>
               <p class="seasonal-title-cn">二十四节气</p>
             </div>
@@ -118,14 +123,22 @@
           </div>
           <div class="seasonal-rail" data-seasonal-rail aria-label="Seasonal poster series"></div>
           <p class="rail-hint"><span aria-hidden="true">←</span> DRAG TO EXPLORE <span aria-hidden="true">→</span></p>
+          <footer class="site-footer">
+            <a href="mailto:yxyjoyce@qq.com">yxyjoyce@qq.com</a>
+            <a class="back-to-top" href="#home">BACK TO TOP <span aria-hidden="true">↗</span></a>
+            <p>© 2021 by Xiaoying Ye.</p>
+          </footer>
         </section>
       </main>
+      </div>
 
-      <footer class="site-footer">
-        <a href="mailto:yxyjoyce@qq.com">yxyjoyce@qq.com</a>
-        <a class="back-to-top" href="#home">BACK TO TOP <span aria-hidden="true">↗</span></a>
-        <p>© 2021 by Xiaoying Ye.</p>
-      </footer>
+      <div class="page-switcher" aria-live="polite">
+        <span data-page-count>01 / 04</span>
+        <button data-page-next type="button" aria-label="Go to selected motion">
+          <span data-page-next-label>NEXT SECTION</span>
+          <span class="page-switcher-arrow" aria-hidden="true">↓</span>
+        </button>
+      </div>
     </div>
 
     <script src="./data/works.js"></script>
