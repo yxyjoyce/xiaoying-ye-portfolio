@@ -276,9 +276,7 @@ main[data-page-track] > section {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.985);
-  clip-path: inset(3% 5% 4% 0 round 0 0 18% 0);
-  transition: opacity 420ms ease, transform 680ms cubic-bezier(0.22, 0.61, 0.36, 1), clip-path 680ms cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 680ms;
+  transition: opacity 100ms ease, visibility 0s linear 100ms;
 }
 
 main[data-page-track] > section[aria-hidden="false"] {
@@ -286,8 +284,8 @@ main[data-page-track] > section[aria-hidden="false"] {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  transform: scale(1);
-  clip-path: inset(0 round 0);
+  transform: none;
+  clip-path: none;
   transition-delay: 0s;
 }
 
@@ -1215,8 +1213,8 @@ main[data-page-track] > section[aria-hidden="true"] {
   }
 
   main[data-page-track] > section {
-    transform: translateX(16px) scale(0.99);
-    clip-path: inset(0 0 0 5%);
+    transform: none;
+    clip-path: none;
   }
 
   .hero-background img {
@@ -1497,44 +1495,116 @@ main[data-page-track] > section[aria-hidden="true"] {
 
   main[data-page-track] > section {
     transform: none;
-    clip-path: inset(0);
+    clip-path: none;
   }
-
 }
 
-/* Advanced panel choreography: native View Transitions enhance the same visual
-   language as the CSS fallback, while header and controls remain stable. */
-main[data-page-track] {
-  view-transition-name: portfolio-panels;
+/* Deterministic single curtain: the panel state changes behind one opaque,
+   direction-aware cover so every browser sees the same timeline. */
+.panel-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
 }
 
-.site-header {
-  view-transition-name: portfolio-header;
+.panel-curtain.is-active {
+  visibility: visible;
 }
 
-.page-switcher {
-  view-transition-name: portfolio-switcher;
+.panel-curtain.is-active::after {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: var(--red);
+  content: "";
+  pointer-events: none;
+  transform: translateY(var(--curtain-line-y, 0));
+  animation: curtain-sweep 620ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-main[data-page-track] > section {
-  transform: scale(0.985);
-  clip-path: inset(3% 5% 4% 0 round 0 0 18% 0);
-  transition: opacity 420ms ease, transform 680ms cubic-bezier(0.22, 0.61, 0.36, 1), clip-path 680ms cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 680ms;
+body[data-transition-direction="backward"] .panel-curtain.is-active::after {
+  top: -4px;
+  bottom: auto;
+  animation-name: curtain-sweep-backward;
 }
 
-main[data-page-track] > section[aria-hidden="false"] {
-  transform: scale(1);
-  clip-path: inset(0 round 0);
-  transition-delay: 0s;
+.panel-curtain-slat {
+  position: absolute;
+  inset: 0;
+  display: block;
+  height: 100%;
+  background: #181714;
+  transform: translateY(105%);
+}
+
+body[data-transition-target="home"] .panel-curtain-slat,
+body[data-transition-target="other-works"] .panel-curtain-slat {
+  background: #eee8dc;
+}
+
+body[data-transition-direction="backward"] .panel-curtain-slat {
+  transform: translateY(-105%);
+}
+
+.panel-curtain.is-covering .panel-curtain-slat {
+  animation: curtain-cover-bottom 240ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+body[data-transition-direction="backward"] .panel-curtain.is-covering .panel-curtain-slat {
+  animation-name: curtain-cover-top;
+}
+
+.panel-curtain.is-revealing .panel-curtain-slat {
+  animation: curtain-reveal-top 360ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: 0ms;
+}
+
+body[data-transition-direction="backward"] .panel-curtain.is-revealing .panel-curtain-slat {
+  animation-name: curtain-reveal-bottom;
+}
+
+@keyframes curtain-cover-top {
+  from { transform: translateY(-105%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes curtain-cover-bottom {
+  from { transform: translateY(105%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes curtain-reveal-top {
+  from { transform: translateY(0); }
+  to { transform: translateY(-105%); }
+}
+
+@keyframes curtain-reveal-bottom {
+  from { transform: translateY(0); }
+  to { transform: translateY(105%); }
+}
+
+@keyframes curtain-sweep {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100vh - 8px)); }
+}
+
+@keyframes curtain-sweep-backward {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(100vh + 8px)); }
 }
 
 main[data-page-track] > section.is-exiting {
   z-index: 2;
   visibility: visible;
-  opacity: 1;
   pointer-events: none;
-  transform: scale(0.975);
-  clip-path: inset(0 0 0 0 round 0);
+  animation: panel-old-out 240ms ease both;
 }
 
 main[data-page-track] > section.is-entering {
@@ -1542,121 +1612,48 @@ main[data-page-track] > section.is-entering {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  transform: scale(0.985);
-  clip-path: inset(0 18% 13% 0 round 0 0 38% 0);
+  animation: panel-new-in 360ms ease both;
 }
 
-main[data-page-track] > section.is-entering.is-active {
-  animation: panel-ink-reveal 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+main[data-page-track] > section.is-entering .section-heading,
+main[data-page-track] > section.is-entering .hero-copy {
+  animation: content-clip-in 260ms cubic-bezier(0.22, 0.61, 0.36, 1) 100ms both;
 }
 
-main[data-page-track] > section.is-entering.is-active .hero-copy,
-main[data-page-track] > section.is-entering.is-active .section-heading {
-  animation: panel-content-in 520ms cubic-bezier(0.22, 0.61, 0.36, 1) 80ms both;
+main[data-page-track] > section.is-entering .motion-layout,
+main[data-page-track] > section.is-entering .seasonal-rail,
+main[data-page-track] > section.is-entering .other-rail {
+  animation: content-slide-in 300ms cubic-bezier(0.22, 0.61, 0.36, 1) 170ms both;
 }
 
-main[data-page-track] > section.is-entering.is-active .motion-layout,
-main[data-page-track] > section.is-entering.is-active .seasonal-rail,
-main[data-page-track] > section.is-entering.is-active .other-rail {
-  animation: panel-content-in 560ms cubic-bezier(0.22, 0.61, 0.36, 1) 150ms both;
+main[data-page-track] > section.is-entering .motion-index,
+main[data-page-track] > section.is-entering .rail-hint,
+main[data-page-track] > section.is-entering .site-footer {
+  animation: content-fade-in 220ms ease 240ms both;
 }
 
-main[data-page-track] > section.is-entering.is-active .motion-index,
-main[data-page-track] > section.is-entering.is-active .rail-hint,
-main[data-page-track] > section.is-entering.is-active .site-footer {
-  animation: panel-content-in 480ms cubic-bezier(0.22, 0.61, 0.36, 1) 220ms both;
+@keyframes panel-old-out {
+  to { opacity: 0.18; transform: scale(0.97); filter: contrast(0.76); }
 }
 
-body[data-transitioning]::before,
-body[data-transitioning]::after {
-  position: fixed;
-  z-index: 35;
-  pointer-events: none;
-  content: "";
+@keyframes panel-new-in {
+  from { opacity: 0.86; }
+  to { opacity: 1; }
 }
 
-body[data-transitioning]::before {
-  inset: 0;
-  background: var(--ink);
-  mix-blend-mode: multiply;
-  opacity: 0.14;
-  clip-path: polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%);
-  animation: ink-curtain-forward 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+@keyframes content-clip-in {
+  from { opacity: 0; clip-path: inset(0 12% 0 0); }
+  to { opacity: 1; clip-path: inset(0); }
 }
 
-body[data-transition-direction="backward"][data-transitioning]::before {
-  animation-name: ink-curtain-backward;
+@keyframes content-slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-body[data-transitioning]::after {
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 2px;
-  background: var(--red);
-  transform: scaleY(0);
-  transform-origin: bottom;
-  animation: ink-line-sweep 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
-}
-
-body[data-transition-direction="backward"][data-transitioning]::after {
-  right: 0;
-  left: auto;
-  transform-origin: top;
-}
-
-@keyframes panel-ink-reveal {
-  0% { opacity: 0.84; transform: scale(0.985); clip-path: inset(0 18% 13% 0 round 0 0 38% 0); }
-  62% { opacity: 1; clip-path: inset(0 4% 3% 0 round 0 0 12% 0); }
-  100% { opacity: 1; transform: scale(1); clip-path: inset(0 round 0); }
-}
-
-@keyframes panel-content-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes ink-curtain-forward {
-  0% { clip-path: polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%); opacity: 0; }
-  35% { clip-path: polygon(100% 100%, 100% 0, 72% 20%, 55% 62%, 28% 100%); opacity: 0.18; }
-  100% { clip-path: polygon(100% 100%, 100% 0, 0 0, 0 100%); opacity: 0; }
-}
-
-@keyframes ink-curtain-backward {
-  0% { clip-path: polygon(0 0, 0 0, 0 0, 0 0); opacity: 0; }
-  35% { clip-path: polygon(0 0, 0 100%, 28% 80%, 45% 38%, 72% 0); opacity: 0.18; }
-  100% { clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0); opacity: 0; }
-}
-
-@keyframes ink-line-sweep {
-  0% { transform: scaleY(0); opacity: 0; }
-  24% { transform: scaleY(0.26); opacity: 1; }
-  70% { transform: scaleY(1); opacity: 1; }
-  100% { transform: scaleY(0); opacity: 0; }
-}
-
-@supports (view-transition-name: portfolio-panels) {
-  ::view-transition-group(portfolio-header),
-  ::view-transition-group(portfolio-switcher) {
-    animation: none;
-  }
-
-  ::view-transition-old(portfolio-panels) {
-    animation: view-old-panel 420ms ease both;
-  }
-
-  ::view-transition-new(portfolio-panels) {
-    animation: view-new-panel 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
-  }
-}
-
-@keyframes view-old-panel {
-  to { opacity: 0; transform: scale(0.975); filter: contrast(0.78); }
-}
-
-@keyframes view-new-panel {
-  from { opacity: 0.24; transform: scale(0.985); clip-path: inset(0 18% 13% 0 round 0 0 38% 0); }
-  to { opacity: 1; transform: scale(1); clip-path: inset(0 round 0); }
+@keyframes content-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .motion-section,
@@ -2080,15 +2077,16 @@ body[data-active-section="other-works"] .page-switcher {
 
 @media (prefers-reduced-motion: reduce) {
   main[data-page-track] > section,
-  main[data-page-track] > section.is-entering.is-active {
+  main[data-page-track] > section.is-entering,
+  main[data-page-track] > section.is-exiting {
     animation: none !important;
     transition-duration: 100ms !important;
     transform: none !important;
-    clip-path: inset(0) !important;
+    clip-path: none !important;
+    filter: none !important;
   }
 
-  body[data-transitioning]::before,
-  body[data-transitioning]::after {
+  .panel-curtain {
     display: none;
   }
 

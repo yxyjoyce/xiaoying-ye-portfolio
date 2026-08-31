@@ -6,7 +6,7 @@
 
 - 根页面 `index.html` 是唯一可见作品集页面。
 - 导航只保留 `HOME` 与 `WORK`；`WORK` 指向 `#animation`，旧锚点 `#selected-motion` 会兼容跳转到 `#animation`。
-- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`，不使用整屏纵向 track 滚动。支持 `document.startViewTransition()` 时使用约 760ms 的水墨幕布、朱砂线扫过和 80/150/220ms 内容错时；不支持时使用同构的 `clip-path`/opacity fallback，减少动画时仅保留不超过 100ms 的淡入。鼠标滚轮、键盘方向键/Home/End/PageUp/PageDown 和页面上的切换按钮都会逐屏切换。手机触摸仅在纵向占优且 `abs(deltaY) >= 40px`、`abs(deltaY) >= abs(deltaX) * 1.2` 时切一屏；Seasonal/Other/Animation rail 保留原生横向触摸滚动，不用全局 `touchmove` 粗暴拦截。
+- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`，不使用整屏纵向 track 滚动。切屏使用所有浏览器一致的原生 CSS/JavaScript 全宽横向幕布：前进由下向上覆盖并揭示，返回由上向下覆盖并揭示，朱砂横线同步按方向扫过；约 260ms 时切换活动 panel，总时长约 720ms。`prefers-reduced-motion` 下取消幕布，只保留不超过 100ms 的淡入。鼠标滚轮、键盘方向键/Home/End/PageUp/PageDown 和页面上的切换按钮都会逐屏切换。手机触摸仅在纵向占优且 `abs(deltaY) >= 40px`、`abs(deltaY) >= abs(deltaX) * 1.2` 时切一屏；Seasonal/Other/Animation rail 保留原生横向触摸滚动，不用全局 `touchmove` 粗暴拦截。
 - `Seasonal Posters` 位于 `#seasonal-posters`，`Other Works` 位于 `#other-works`，末页按钮为 `BACK TO TOP`。
 - 页脚仅包含 `yxyjoyce@qq.com`、`BACK TO TOP` 与 `© 2021 by Xiaoying Ye.`。
 - `additional-works/index.html` 相对路径跳转到 `../index.html#other-works`；`about/index.html` 与 `contact/index.html` 相对路径跳转到 `../index.html#home`，兼容旧链接及 `file://` 直接打开。
@@ -33,7 +33,7 @@ node server.mjs
 
 Hero 背景使用用户确认效果图提取的 ImageGen 成品 `assets/images/hero-rendered-background-v1.png`（1777×885），不再引用旧 `hero-f26-background.png` 透明增强图或旧精卫矩形截图。成品背景直接以 `object-fit: cover` 显示，桌面完整宽幅覆盖，手机以 `object-position: 62% center` 保证主峰可见；不再使用 `multiply`、mask 或明显 blur 重构山形。页面暖米白基准保持为 `#f4efe5`，项目中的原始 GIF、`E:\作品` 素材与旧 F26 派生 PNG 均保留但不写回/不引用。
 Animation 手机端按“标题 → 16:9 播放器 → 紧凑信息 → 缩略图 rail”排布，完整介绍通过原生底部 `dialog` 抽屉查看；Seasonal 桌面约三张完整卡片加下一张露边，手机卡片约 82vw；Other Works 手机卡片约 84vw。桌面窄高度使用 `max-height: 760px` 紧凑规则，末屏页脚与切换按钮各自占位，避免覆盖。
-HTML 为变更后的 CSS 与 Hero 派生 PNG 使用版本查询参数主动绕过旧缓存；本轮 JavaScript 版本同步更新为 `?v=20260831-7`。
+HTML 为变更后的 CSS 与 Hero 派生 PNG 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本分别为 `?v=20260831-14` 与 `?v=20260831-10`。
 
 ## GitHub Pages 发布副本
 
@@ -45,10 +45,10 @@ HTML 为变更后的 CSS 与 Hero 派生 PNG 使用版本查询参数主动绕�
 - [MDN CSS 与 JavaScript 无障碍](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/CSS_and_JavaScript)：panel 切换同步 `aria-hidden`、`inert` 与焦点，避免隐藏内容继续进入辅助技术和键盘顺序。
 - [MDN wheel 事件](https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event)：滚轮监听按垂直方向逐屏切换，并只在需要时取消默认行为；作品 rail 保留原生横向滚动。
 - [MDN Scrollbars styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling)：Seasonal/Other 使用原生 `overflow-x: auto` 滚动条，并以红色 thumb 和灰色 track 保持可见对比。
-- [MDN View Transition API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API) 与 [view-transition-name](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/view-transition-name)：用于同文档 panel 切换的渐进增强和稳定 header/switcher 快照命名。
-- [Codrops 2025 Portfolio Case Study](https://tympanus.net/codrops/2025/03/05/case-study-stefan-vitasovic-portfolio-2025/) 与 [Codrops Vanilla JS Layered Reveal](https://tympanus.net/codrops/2026/02/26/building-async-page-transitions-in-vanilla-javascript/)：参考分层 reveal、内容错时和幕布式过渡；实现仍保持原生 CSS/JS。
+- [MDN CSS animations](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations/Using_CSS_animations)：用于确定性幕布覆盖、揭示与减少动画偏好。
+- [Codrops 2025 Portfolio Case Study](https://tympanus.net/codrops/2025/03/05/case-study-stefan-vitasovic-portfolio-2025/)：参考内容错时和遮罩式过渡；实现仍保持原生 CSS/JS。
 
-采用原生 View Transition + CSS fallback，不采用 GSAP/WebGL：本项目不需要持续 3D 场景或大型时间轴库，原生方案可离线运行、减少包体与运行时依赖，并在不支持新 API 的浏览器中保留同样的导航和无障碍状态。
+最终不采用 View Transition API、GSAP 或 WebGL。此前 View Transition/水墨遮罩在实际浏览器中表现过淡，首版多分栏幕板的中间帧又过于碎裂；当前单一全宽横向幕布在桌面和手机上使用同一条确定性时间线，离线和 GitHub Pages 均无需额外运行时。
 
 ## 验证
 
