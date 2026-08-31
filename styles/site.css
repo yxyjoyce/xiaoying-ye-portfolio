@@ -276,9 +276,9 @@ main[data-page-track] > section {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(28px) scale(0.985);
-  clip-path: inset(0 0 0 8%);
-  transition: opacity 480ms cubic-bezier(0.22, 0.61, 0.36, 1), transform 480ms cubic-bezier(0.22, 0.61, 0.36, 1), clip-path 480ms cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 480ms;
+  transform: scale(0.985);
+  clip-path: inset(3% 5% 4% 0 round 0 0 18% 0);
+  transition: opacity 420ms ease, transform 680ms cubic-bezier(0.22, 0.61, 0.36, 1), clip-path 680ms cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 680ms;
 }
 
 main[data-page-track] > section[aria-hidden="false"] {
@@ -286,8 +286,8 @@ main[data-page-track] > section[aria-hidden="false"] {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(0) scale(1);
-  clip-path: inset(0);
+  transform: scale(1);
+  clip-path: inset(0 round 0);
   transition-delay: 0s;
 }
 
@@ -1382,6 +1382,8 @@ main[data-page-track] > section[aria-hidden="true"] {
   .seasonal-rail,
   .other-rail {
     width: calc(100% + var(--gutter));
+    max-width: none;
+    margin-left: 0;
     margin-right: calc(var(--gutter) * -1);
     padding-right: var(--gutter);
   }
@@ -1498,4 +1500,599 @@ main[data-page-track] > section[aria-hidden="true"] {
     clip-path: inset(0);
   }
 
+}
+
+/* Advanced panel choreography: native View Transitions enhance the same visual
+   language as the CSS fallback, while header and controls remain stable. */
+main[data-page-track] {
+  view-transition-name: portfolio-panels;
+}
+
+.site-header {
+  view-transition-name: portfolio-header;
+}
+
+.page-switcher {
+  view-transition-name: portfolio-switcher;
+}
+
+main[data-page-track] > section {
+  transform: scale(0.985);
+  clip-path: inset(3% 5% 4% 0 round 0 0 18% 0);
+  transition: opacity 420ms ease, transform 680ms cubic-bezier(0.22, 0.61, 0.36, 1), clip-path 680ms cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 680ms;
+}
+
+main[data-page-track] > section[aria-hidden="false"] {
+  transform: scale(1);
+  clip-path: inset(0 round 0);
+  transition-delay: 0s;
+}
+
+main[data-page-track] > section.is-exiting {
+  z-index: 2;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: none;
+  transform: scale(0.975);
+  clip-path: inset(0 0 0 0 round 0);
+}
+
+main[data-page-track] > section.is-entering {
+  z-index: 1;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(0.985);
+  clip-path: inset(0 18% 13% 0 round 0 0 38% 0);
+}
+
+main[data-page-track] > section.is-entering.is-active {
+  animation: panel-ink-reveal 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+main[data-page-track] > section.is-entering.is-active .hero-copy,
+main[data-page-track] > section.is-entering.is-active .section-heading {
+  animation: panel-content-in 520ms cubic-bezier(0.22, 0.61, 0.36, 1) 80ms both;
+}
+
+main[data-page-track] > section.is-entering.is-active .motion-layout,
+main[data-page-track] > section.is-entering.is-active .seasonal-rail,
+main[data-page-track] > section.is-entering.is-active .other-rail {
+  animation: panel-content-in 560ms cubic-bezier(0.22, 0.61, 0.36, 1) 150ms both;
+}
+
+main[data-page-track] > section.is-entering.is-active .motion-index,
+main[data-page-track] > section.is-entering.is-active .rail-hint,
+main[data-page-track] > section.is-entering.is-active .site-footer {
+  animation: panel-content-in 480ms cubic-bezier(0.22, 0.61, 0.36, 1) 220ms both;
+}
+
+body[data-transitioning]::before,
+body[data-transitioning]::after {
+  position: fixed;
+  z-index: 35;
+  pointer-events: none;
+  content: "";
+}
+
+body[data-transitioning]::before {
+  inset: 0;
+  background: var(--ink);
+  mix-blend-mode: multiply;
+  opacity: 0.14;
+  clip-path: polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%);
+  animation: ink-curtain-forward 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+body[data-transition-direction="backward"][data-transitioning]::before {
+  animation-name: ink-curtain-backward;
+}
+
+body[data-transitioning]::after {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--red);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation: ink-line-sweep 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+body[data-transition-direction="backward"][data-transitioning]::after {
+  right: 0;
+  left: auto;
+  transform-origin: top;
+}
+
+@keyframes panel-ink-reveal {
+  0% { opacity: 0.84; transform: scale(0.985); clip-path: inset(0 18% 13% 0 round 0 0 38% 0); }
+  62% { opacity: 1; clip-path: inset(0 4% 3% 0 round 0 0 12% 0); }
+  100% { opacity: 1; transform: scale(1); clip-path: inset(0 round 0); }
+}
+
+@keyframes panel-content-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ink-curtain-forward {
+  0% { clip-path: polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%); opacity: 0; }
+  35% { clip-path: polygon(100% 100%, 100% 0, 72% 20%, 55% 62%, 28% 100%); opacity: 0.18; }
+  100% { clip-path: polygon(100% 100%, 100% 0, 0 0, 0 100%); opacity: 0; }
+}
+
+@keyframes ink-curtain-backward {
+  0% { clip-path: polygon(0 0, 0 0, 0 0, 0 0); opacity: 0; }
+  35% { clip-path: polygon(0 0, 0 100%, 28% 80%, 45% 38%, 72% 0); opacity: 0.18; }
+  100% { clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0); opacity: 0; }
+}
+
+@keyframes ink-line-sweep {
+  0% { transform: scaleY(0); opacity: 0; }
+  24% { transform: scaleY(0.26); opacity: 1; }
+  70% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(0); opacity: 0; }
+}
+
+@supports (view-transition-name: portfolio-panels) {
+  ::view-transition-group(portfolio-header),
+  ::view-transition-group(portfolio-switcher) {
+    animation: none;
+  }
+
+  ::view-transition-old(portfolio-panels) {
+    animation: view-old-panel 420ms ease both;
+  }
+
+  ::view-transition-new(portfolio-panels) {
+    animation: view-new-panel 680ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+}
+
+@keyframes view-old-panel {
+  to { opacity: 0; transform: scale(0.975); filter: contrast(0.78); }
+}
+
+@keyframes view-new-panel {
+  from { opacity: 0.24; transform: scale(0.985); clip-path: inset(0 18% 13% 0 round 0 0 38% 0); }
+  to { opacity: 1; transform: scale(1); clip-path: inset(0 round 0); }
+}
+
+.motion-section,
+.seasonal-section,
+.other-section {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  min-width: 0;
+}
+
+.motion-layout {
+  min-height: 0;
+  min-width: 0;
+}
+
+.section-heading,
+.motion-stage,
+.motion-index,
+.seasonal-rail,
+.other-rail {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.player-frame {
+  height: min(42vh, 430px);
+}
+
+.seasonal-card {
+  flex-basis: min(29vw, calc((100vw - (2 * var(--gutter)) - (4 * clamp(16px, 2vw, 30px))) / 3));
+  margin: 0;
+}
+
+.seasonal-card--featured {
+  flex-basis: min(29vw, calc((100vw - (2 * var(--gutter)) - (4 * clamp(16px, 2vw, 30px))) / 3));
+}
+
+.seasonal-media {
+  height: min(52vh, 470px);
+}
+
+body[data-active-section="other-works"] .page-switcher {
+  display: none;
+}
+
+.motion-details-button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  margin-top: 2px;
+  padding: 0 13px;
+  border: 1px solid var(--red);
+  background: transparent;
+  color: var(--ivory);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+
+.motion-dialog {
+  width: min(680px, calc(100% - 32px));
+  max-width: 100%;
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--red);
+  background: var(--ink-soft);
+  color: var(--ivory);
+}
+
+.motion-dialog::backdrop {
+  background: rgba(8, 7, 5, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+.motion-dialog-inner {
+  padding: 24px;
+}
+
+.motion-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.motion-dialog-close {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  color: var(--ivory);
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.motion-dialog h2 {
+  margin: 20px 0 4px;
+  font-family: var(--font-body);
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.motion-dialog-subtitle {
+  margin: 0 0 18px;
+  color: var(--gold);
+  font-family: var(--font-editorial);
+  font-size: 20px;
+  font-style: italic;
+}
+
+.motion-dialog-description {
+  max-height: 60vh;
+  margin: 0;
+  overflow-y: auto;
+  color: var(--mist);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+@media (max-height: 760px) and (min-width: 621px) {
+  :root {
+    --header-height: 64px;
+    --section-pad: 18px;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(2.25rem, 4.8vw, 5.2rem);
+  }
+
+  .section-heading {
+    margin-bottom: 13px;
+  }
+
+  .player-frame {
+    height: min(36vh, 300px);
+  }
+
+  .seasonal-media {
+    height: min(42vh, 310px);
+  }
+
+  .other-tile-frame {
+    height: min(29vh, 210px);
+  }
+
+  .site-footer {
+    min-height: 47px;
+    padding-top: 7px;
+  }
+}
+
+@media (max-width: 620px) {
+  :root {
+    --header-height: 58px;
+    --section-pad: 14px;
+  }
+
+  .site-shell,
+  .page-viewport,
+  main[data-page-track],
+  main[data-page-track] > section {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  .site-header {
+    min-height: var(--header-height);
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .hero-copy {
+    top: 18vh;
+  }
+
+  .hero-title {
+    font-size: clamp(3.1rem, 13vw, 5.1rem);
+    line-height: 0.9;
+  }
+
+  .hero-cta {
+    margin-top: 34px;
+  }
+
+  .motion-section,
+  .seasonal-section,
+  .other-section {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    padding-top: calc(var(--header-height) + var(--section-pad));
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+
+  .section-heading h2 {
+    font-size: clamp(2.2rem, 11.5vw, 3.8rem);
+    line-height: 0.9;
+  }
+
+  .section-heading {
+    margin-bottom: 10px;
+  }
+
+  .section-intro,
+  .section-note {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .motion-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .motion-stage {
+    flex: 0 0 auto;
+  }
+
+  .player-frame {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .player-progress {
+    margin-top: 7px;
+    gap: 5px;
+  }
+
+  .motion-details {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 12px;
+    margin-top: 7px;
+    padding-top: 8px;
+  }
+
+  .motion-title-block {
+    gap: 9px;
+  }
+
+  .motion-current-number {
+    font-size: 25px;
+  }
+
+  .motion-title-block h3 {
+    font-size: clamp(18px, 5.8vw, 24px);
+  }
+
+  .motion-subtitle {
+    margin-top: 4px;
+    font-size: 16px;
+  }
+
+  .motion-duration {
+    font-size: 30px;
+  }
+
+  .motion-description {
+    display: none;
+  }
+
+  .motion-details-button {
+    display: inline-flex;
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .motion-index {
+    flex: 0 0 auto;
+    min-height: 0;
+    margin-top: 2px;
+    padding-top: 7px;
+    width: 100%;
+  }
+
+  .motion-index-head {
+    padding-bottom: 6px;
+    font-size: 9px;
+  }
+
+  .motion-list {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(5, minmax(116px, 1fr));
+    max-height: 86px;
+  }
+
+  .motion-item {
+    grid-template-columns: 24px minmax(0, 1fr);
+    grid-template-rows: auto 39px;
+    min-height: 84px;
+    padding: 7px 9px 7px 0;
+  }
+
+  .motion-item img {
+    width: 64px;
+    height: 39px;
+  }
+
+  .motion-item-title {
+    font-size: 11px;
+  }
+
+  .motion-item-subtitle {
+    margin-top: 2px;
+    font-size: 10px;
+  }
+
+  .seasonal-section {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .seasonal-title-cn {
+    margin-top: 8px;
+    font-size: 27px;
+  }
+
+  .seasonal-rail,
+  .other-rail {
+    width: calc(100% + var(--gutter));
+    margin-right: calc(var(--gutter) * -1);
+    padding-right: var(--gutter);
+  }
+
+  .seasonal-rail {
+    gap: 14px;
+    padding-top: 4px;
+    padding-bottom: 9px;
+  }
+
+  .seasonal-card,
+  .seasonal-card--featured {
+    flex-basis: 82vw;
+  }
+
+  .seasonal-media {
+    height: min(50vh, 430px);
+  }
+
+  .seasonal-card-meta {
+    padding-top: 8px;
+  }
+
+  .seasonal-meta-title {
+    font-size: 21px;
+  }
+
+  .rail-hint {
+    display: none;
+  }
+
+  .other-rail {
+    gap: 12px;
+    padding-top: 8px;
+    padding-bottom: 10px;
+  }
+
+  .other-grid {
+    gap: 12px;
+  }
+
+  .other-tile {
+    flex-basis: 84vw;
+  }
+
+  .other-tile-label {
+    min-height: 44px;
+    margin-bottom: 7px;
+  }
+
+  .other-tile-number {
+    font-size: 40px;
+  }
+
+  .other-tile-frame {
+    height: min(48vh, 390px);
+  }
+
+  .site-footer {
+    min-height: 45px;
+    margin-top: 2px;
+    padding-top: 7px;
+  }
+
+  .page-switcher {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
+  }
+
+  .motion-dialog {
+    width: 100%;
+    max-height: 76dvh;
+    margin: auto 0 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+  }
+
+  .motion-dialog-inner {
+    max-height: 76dvh;
+    padding: 17px var(--gutter) calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .motion-dialog[open] {
+    animation: dialog-rise 240ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  .motion-dialog-description {
+    max-height: none;
+    font-size: 14px;
+    line-height: 1.62;
+  }
+}
+
+@keyframes dialog-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main[data-page-track] > section,
+  main[data-page-track] > section.is-entering.is-active {
+    animation: none !important;
+    transition-duration: 100ms !important;
+    transform: none !important;
+    clip-path: inset(0) !important;
+  }
+
+  body[data-transitioning]::before,
+  body[data-transitioning]::after {
+    display: none;
+  }
+
+  .motion-dialog[open] {
+    animation: none;
+  }
 }

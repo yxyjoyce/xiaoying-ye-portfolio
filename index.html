@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Xiaoying Ye — Motion Graphics Designer and Animator.">
     <title>Xiaoying Ye — Portfolio</title>
-    <link rel="stylesheet" href="./styles/site.css?v=20260831-10">
+    <link rel="stylesheet" href="./styles/site.css?v=20260831-11">
   </head>
   <body data-page="home" data-root=".">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -82,6 +82,7 @@
                   </div>
                   <time class="motion-duration" data-motion-duration-label datetime="PT213S">03:33</time>
                   <p class="motion-description" data-motion-description></p>
+                  <button class="motion-details-button" data-motion-details type="button">VIEW DETAILS</button>
                 </div>
               </div>
 
@@ -126,6 +127,18 @@
         </main>
       </div>
 
+      <dialog class="motion-dialog" data-motion-dialog aria-labelledby="motion-dialog-title">
+        <div class="motion-dialog-inner">
+          <div class="motion-dialog-head">
+            <p class="section-number">PROJECT DETAILS</p>
+            <button class="motion-dialog-close" data-motion-dialog-close type="button" aria-label="Close project details">×</button>
+          </div>
+          <h2 id="motion-dialog-title" data-motion-dialog-title></h2>
+          <p class="motion-dialog-subtitle" data-motion-dialog-subtitle></p>
+          <p class="motion-dialog-description" data-motion-dialog-description></p>
+        </div>
+      </dialog>
+
       <div class="page-switcher" aria-live="polite">
         <span data-page-count>01 / 04</span>
         <button data-page-next type="button" aria-label="Go to animation">
@@ -136,6 +149,6 @@
     </div>
 
     <script src="./data/works.js"></script>
-    <script src="./scripts/site.js?v=20260831-6"></script>
+    <script src="./scripts/site.js?v=20260831-7"></script>
   </body>
 </html>

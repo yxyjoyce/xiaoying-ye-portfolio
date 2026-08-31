@@ -60,7 +60,7 @@
     if (sections.length === 0 || !nextButton || !nextLabel || !pageCount || !track) return;
 
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const transitionDuration = 480;
+    const transitionDuration = 760;
     const horizontalRailSelector = ".motion-list, .other-rail, .other-grid, .seasonal-rail";
     const initialHash = normalizeSectionId(window.location.hash.slice(1));
     const initialIndex = sections.findIndex((section) => section.id === initialHash);
@@ -95,6 +95,14 @@
       nextButton.setAttribute("aria-label", atEnd ? "Back to top" : `Go to ${heading?.textContent.trim() || destination.id}`);
     };
 
+    const finishTransition = (oldSection, nextSection) => {
+      oldSection?.classList.remove("is-exiting");
+      nextSection?.classList.remove("is-entering");
+      document.body.removeAttribute("data-transitioning");
+      document.body.removeAttribute("data-transition-direction");
+      locked = false;
+    };
+
     const goTo = (requestedIndex, { writeHistory = true, focusPanel = false } = {}) => {
       const nextIndex = Math.max(0, Math.min(requestedIndex, sections.length - 1));
       if (nextIndex === activeIndex) {
@@ -103,17 +111,37 @@
       }
       if (locked) return;
       locked = true;
+      const oldIndex = activeIndex;
+      const oldSection = sections[oldIndex];
+      const nextSection = sections[nextIndex];
+      const direction = nextIndex > oldIndex ? "forward" : "backward";
+      const reduced = motionPreference.matches;
       activeIndex = nextIndex;
-      const nextSection = sections[activeIndex];
-      setActiveA11y(activeIndex);
-      track.dataset.activeIndex = String(activeIndex);
-      document.body.dataset.activeSection = nextSection.id;
-      if (writeHistory) window.history.pushState(null, "", `#${nextSection.id}`);
-      updateSwitcher(nextIndex);
-      window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: nextSection.id, index: nextIndex } }));
-      if (focusPanel) nextSection.focus({ preventScroll: true });
-      window.clearTimeout(transitionTimer);
-      transitionTimer = window.setTimeout(() => { locked = false; }, motionPreference.matches ? 20 : transitionDuration);
+      const commit = () => {
+        oldSection?.classList.add("is-exiting");
+        nextSection.classList.add("is-entering");
+        setActiveA11y(activeIndex);
+        track.dataset.activeIndex = String(activeIndex);
+        document.body.dataset.activeSection = nextSection.id;
+        document.body.dataset.transitionDirection = direction;
+        document.body.dataset.transitioning = "true";
+        if (writeHistory) window.history.pushState(null, "", `#${nextSection.id}`);
+        updateSwitcher(nextIndex);
+        window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: nextSection.id, index: nextIndex, direction } }));
+        if (focusPanel) nextSection.focus({ preventScroll: true });
+      };
+
+      const complete = () => {
+        window.clearTimeout(transitionTimer);
+        finishTransition(oldSection, nextSection);
+      };
+
+      if (typeof document.startViewTransition === "function" && !reduced) {
+        document.startViewTransition(() => commit()).finished.then(complete).catch(complete);
+      } else {
+        commit();
+        transitionTimer = window.setTimeout(complete, reduced ? 100 : transitionDuration);
+      }
     };
 
     const isEditableTarget = (target) => target?.closest("input, textarea, select, [contenteditable=\"true\"]");
@@ -194,7 +222,9 @@
       const verticalSwipe = distanceY >= 40 && distanceY >= distanceX * 1.2;
       const horizontalSwipe = distanceX > distanceY;
       const railCanScroll = Boolean(touchStart.rail && touchStart.rail.scrollWidth > touchStart.rail.clientWidth + 1);
-      if (verticalSwipe) {
+      if (touchStart.rail && railCanScroll) {
+        // Any gesture that starts on a horizontal work rail belongs to the rail.
+      } else if (verticalSwipe) {
         event.preventDefault();
         goTo(activeIndex + (deltaY < 0 ? 1 : -1));
       } else if (horizontalSwipe || railCanScroll) {
@@ -272,10 +302,24 @@
     const subtitle = document.querySelector("[data-motion-subtitle]");
     const durationLabel = document.querySelector("[data-motion-duration-label]");
     const description = document.querySelector("[data-motion-description]");
+    const detailsButton = document.querySelector("[data-motion-details]");
+    const dialog = document.querySelector("[data-motion-dialog]");
+    const dialogTitle = document.querySelector("[data-motion-dialog-title]");
+    const dialogSubtitle = document.querySelector("[data-motion-dialog-subtitle]");
+    const dialogDescription = document.querySelector("[data-motion-dialog-description]");
+    const dialogClose = document.querySelector("[data-motion-dialog-close]");
     const list = document.querySelector("[data-motion-list]");
     if (!player || !source || !playButton || !seek || !list || motionWorks.length === 0) return;
 
     let currentIndex = 0;
+    let dialogReturnFocus = null;
+
+    const updateDialog = (work) => {
+      if (!work) return;
+      if (dialogTitle) dialogTitle.textContent = work.title;
+      if (dialogSubtitle) dialogSubtitle.textContent = work.subtitle || work.title;
+      if (dialogDescription) dialogDescription.textContent = work.description;
+    };
 
     const updatePlayerUi = () => {
       const playing = !player.paused && !player.ended;
@@ -305,6 +349,7 @@
       durationLabel.textContent = work.duration;
       durationLabel.dateTime = `PT${work.durationSeconds}S`;
       description.textContent = work.description;
+      updateDialog(work);
       list.querySelectorAll("[data-motion-item]").forEach((item, itemIndex) => {
         const active = itemIndex === index;
         item.classList.toggle("is-active", active);
@@ -353,7 +398,24 @@
       }
     });
 
+    detailsButton?.addEventListener("click", () => {
+      if (!dialog) return;
+      dialogReturnFocus = detailsButton;
+      updateDialog(motionWorks[currentIndex]);
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    });
+    dialogClose?.addEventListener("click", () => dialog?.close());
+    dialog?.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog?.addEventListener("close", () => {
+      dialogReturnFocus?.focus({ preventScroll: true });
+      dialogReturnFocus = null;
+    });
+
     description.textContent = motionWorks[0].description;
+    updateDialog(motionWorks[0]);
     seek.max = String(motionWorks[0].durationSeconds);
     updatePlayerUi();
   }
