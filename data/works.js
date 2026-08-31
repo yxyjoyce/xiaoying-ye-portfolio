@@ -1,8 +1,9 @@
 (() => {
-  const works = [
+  const motion = [
     {
       slug: "jingwei-reclamation",
       title: "改编动画精卫填海",
+      subtitle: "Jingwei Fill the Sea",
       duration: "03:33",
       durationSeconds: 213,
       video: "assets/videos/jingwei-reclamation.mp4",
@@ -13,6 +14,7 @@
     {
       slug: "jingwei-fill-the-sea",
       title: "Jingwei Fill the Sea",
+      subtitle: "Jingwei Fill the Sea",
       duration: "02:41",
       durationSeconds: 161,
       video: "assets/videos/jingwei-fill-the-sea.mp4",
@@ -23,6 +25,7 @@
     {
       slug: "gaint-panda",
       title: "Gaint Panda",
+      subtitle: "Gaint Panda",
       duration: "01:18",
       durationSeconds: 78,
       video: "assets/videos/gaint-panda.mp4",
@@ -33,6 +36,7 @@
     {
       slug: "bilibili-splash-screen",
       title: "BILIBILI splash screen",
+      subtitle: "BILIBILI splash screen",
       duration: "00:14",
       durationSeconds: 14,
       video: "assets/videos/bilibili-splash-screen.mp4",
@@ -43,6 +47,7 @@
     {
       slug: "untitled",
       title: "UNTITLED",
+      subtitle: "UNTITLED",
       duration: "01:06",
       durationSeconds: 66,
       video: "assets/videos/untitled.mp4",
@@ -52,6 +57,111 @@
     }
   ];
 
-  window.PORTFOLIO_WORKS = Object.freeze(works);
-})();
+  const otherWorks = [
+    {
+      slug: "provok",
+      number: "01",
+      category: "GRAPHIC",
+      title: "provok.png",
+      image: "assets/images/provok.png",
+      width: 7122,
+      height: 5044,
+      alt: "provok graphic work"
+    },
+    {
+      slug: "boxes-mockup",
+      number: "02",
+      category: "PACKAGING",
+      title: "boxes-mockup-scene-2x.png",
+      image: "assets/images/boxes-mockup-scene-2x.png",
+      width: 2160,
+      height: 1440,
+      alt: "Packaging mockup with floral boxes"
+    },
+    {
+      slug: "scan-2",
+      number: "03",
+      category: "ILLUSTRATION",
+      title: "scan-2.jpg",
+      image: "assets/images/scan-2.jpg",
+      width: 2028,
+      height: 2765,
+      alt: "Illustrated scan"
+    },
+    {
+      slug: "process-page-07",
+      number: "04",
+      category: "PROCESS",
+      title: "process-page-07.png",
+      image: "assets/images/process-page-07-preview.png",
+      width: 5179,
+      height: 2933,
+      alt: "Process study with hand-painted leaves"
+    }
+  ];
 
+  const seasonal = [
+    {
+      slug: "solar-jingzhe",
+      number: "01",
+      title: "惊蛰",
+      englishTitle: "JINGZHE",
+      duration: "00:04",
+      durationSeconds: 4.04,
+      video: "assets/seasonal/solar-jingzhe.mp4",
+      poster: "assets/seasonal/solar-jingzhe.png",
+      alt: "惊蛰 solar term poster"
+    },
+    {
+      slug: "solar-dashu",
+      number: "02",
+      title: "大暑",
+      englishTitle: "DASHU",
+      duration: "00:08",
+      durationSeconds: 8.08,
+      video: "assets/seasonal/solar-dashu.mp4",
+      poster: "assets/seasonal/solar-dashu.png",
+      alt: "大暑 solar term poster"
+    },
+    {
+      slug: "solar-liqiu",
+      number: "03",
+      title: "立秋",
+      englishTitle: "LIQIU",
+      duration: "00:02",
+      durationSeconds: 2.5,
+      video: "assets/seasonal/solar-liqiu.mp4",
+      poster: "assets/seasonal/solar-liqiu.png",
+      alt: "立秋 solar term poster"
+    },
+    {
+      slug: "solar-chushu",
+      number: "04",
+      title: "处暑",
+      englishTitle: "CHUSHU",
+      duration: "00:08",
+      durationSeconds: 8.08,
+      video: "assets/seasonal/solar-chushu.mp4",
+      poster: "assets/seasonal/solar-chushu.png",
+      alt: "处暑 solar term poster"
+    },
+    {
+      slug: "solar-bailu",
+      number: "05",
+      title: "白露",
+      englishTitle: "BAILU",
+      duration: "00:04",
+      durationSeconds: 4.08,
+      video: "assets/seasonal/solar-bailu.mp4",
+      poster: "assets/seasonal/solar-bailu.png",
+      alt: "白露 solar term poster"
+    }
+  ];
+
+  window.PORTFOLIO_DATA = Object.freeze({
+    motion: Object.freeze(motion),
+    otherWorks: Object.freeze(otherWorks),
+    seasonal: Object.freeze(seasonal)
+  });
+  window.PORTFOLIO_WORKS = window.PORTFOLIO_DATA.motion;
+})();
