@@ -4,6 +4,8 @@
   const otherWorks = Array.isArray(portfolio.otherWorks) ? portfolio.otherWorks : [];
   const seasonalWorks = Array.isArray(portfolio.seasonal) ? portfolio.seasonal : [];
   const root = document.body.dataset.root || ".";
+  const sectionIds = ["home", "animation", "seasonal-posters", "other-works"];
+  const sectionAliases = { "selected-motion": "animation" };
 
   const asset = (path) => `${root}/${path}`;
 
@@ -21,10 +23,12 @@
     return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
   };
 
+  const normalizeSectionId = (id) => sectionAliases[id] || id;
+
   function wireNavigation() {
     const routes = {
       home: `${root}/index.html#home`,
-      work: `${root}/index.html#selected-motion`
+      work: `${root}/index.html#animation`
     };
 
     document.querySelectorAll("[data-nav]").forEach((link) => {
@@ -33,45 +37,48 @@
     });
 
     const syncCurrent = (sectionId = document.body.dataset.activeSection || window.location.hash.slice(1) || "home") => {
-      const atHome = sectionId === "home";
+      const activeSection = normalizeSectionId(sectionId);
+      const atHome = activeSection === "home";
       document.querySelectorAll("[data-nav]").forEach((link) => {
         const active = (atHome && link.dataset.nav === "home") || (!atHome && link.dataset.nav === "work");
         if (active) link.setAttribute("aria-current", "page");
         else link.removeAttribute("aria-current");
       });
     };
-    window.addEventListener("hashchange", syncCurrent);
+
+    window.addEventListener("hashchange", () => syncCurrent());
     window.addEventListener("portfolio:sectionchange", (event) => syncCurrent(event.detail?.id));
     syncCurrent();
   }
 
   function initSectionPaging() {
-    const sections = ["home", "selected-motion", "other-works", "seasonal-posters"]
-      .map((id) => document.getElementById(id))
-      .filter(Boolean);
+    const sections = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
     const nextButton = document.querySelector("[data-page-next]");
     const nextLabel = document.querySelector("[data-page-next-label]");
     const pageCount = document.querySelector("[data-page-count]");
-    if (sections.length === 0 || !nextButton || !nextLabel || !pageCount) return;
-
     const track = document.querySelector("[data-page-track]");
-    if (!track) return;
+    if (sections.length === 0 || !nextButton || !nextLabel || !pageCount || !track) return;
+
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const initialIndex = sections.findIndex((section) => `#${section.id}` === window.location.hash);
+    const transitionDuration = 480;
+    const horizontalRailSelector = ".motion-list, .other-rail, .other-grid, .seasonal-rail";
+    const initialHash = normalizeSectionId(window.location.hash.slice(1));
+    const initialIndex = sections.findIndex((section) => section.id === initialHash);
     let activeIndex = initialIndex >= 0 ? initialIndex : 0;
     let locked = false;
     let touchStart = null;
     let transitionTimer = 0;
-    const transitionDuration = 760;
 
-    const sectionIndexFor = (id) => sections.findIndex((section) => section.id === id);
+    const sectionIndexFor = (id) => sections.findIndex((section) => section.id === normalizeSectionId(id));
 
     const setActiveA11y = (index) => {
       sections.forEach((section, sectionIndex) => {
         const active = sectionIndex === index;
+        if (!active && section.contains(document.activeElement)) document.activeElement.blur();
         section.setAttribute("aria-hidden", String(!active));
         section.tabIndex = active ? 0 : -1;
         section.inert = !active;
+        section.classList.toggle("is-active", active);
       });
     };
 
@@ -88,8 +95,8 @@
       nextButton.setAttribute("aria-label", atEnd ? "Back to top" : `Go to ${heading?.textContent.trim() || destination.id}`);
     };
 
-    const goTo = (index, { writeHistory = true } = {}) => {
-      const nextIndex = Math.max(0, Math.min(index, sections.length - 1));
+    const goTo = (requestedIndex, { writeHistory = true, focusPanel = false } = {}) => {
+      const nextIndex = Math.max(0, Math.min(requestedIndex, sections.length - 1));
       if (nextIndex === activeIndex) {
         updateSwitcher(nextIndex);
         return;
@@ -97,34 +104,38 @@
       if (locked) return;
       locked = true;
       activeIndex = nextIndex;
-      track.style.transform = `translate3d(0, -${activeIndex * 100}%, 0)`;
-      document.body.dataset.activeSection = sections[activeIndex].id;
+      const nextSection = sections[activeIndex];
       setActiveA11y(activeIndex);
-      if (writeHistory) window.history.pushState(null, "", `#${sections[activeIndex].id}`);
+      track.dataset.activeIndex = String(activeIndex);
+      document.body.dataset.activeSection = nextSection.id;
+      if (writeHistory) window.history.pushState(null, "", `#${nextSection.id}`);
       updateSwitcher(nextIndex);
-      window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: sections[activeIndex].id, index: activeIndex } }));
+      window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: nextSection.id, index: nextIndex } }));
+      if (focusPanel) nextSection.focus({ preventScroll: true });
       window.clearTimeout(transitionTimer);
-      transitionTimer = window.setTimeout(() => { locked = false; }, motionPreference.matches ? 40 : transitionDuration);
+      transitionTimer = window.setTimeout(() => { locked = false; }, motionPreference.matches ? 20 : transitionDuration);
     };
 
+    const isEditableTarget = (target) => target?.closest("input, textarea, select, [contenteditable=\"true\"]");
+
     nextButton.addEventListener("click", () => {
-      goTo(activeIndex === sections.length - 1 ? 0 : activeIndex + 1);
+      goTo(activeIndex === sections.length - 1 ? 0 : activeIndex + 1, { focusPanel: activeIndex === sections.length - 1 });
     });
 
     const handleWheel = (event) => {
       const target = event.target instanceof Element ? event.target : null;
-      if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey) return;
-      if (Math.abs(event.deltaY) < 16 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      if (target?.closest("input, textarea, select")) return;
+      if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey || isEditableTarget(target)) return;
+      const verticalDistance = Math.abs(event.deltaY);
+      const horizontalDistance = Math.abs(event.deltaX);
+      if (verticalDistance < 16 || horizontalDistance > verticalDistance) return;
       event.preventDefault();
-      if (locked) return;
       goTo(activeIndex + (event.deltaY > 0 ? 1 : -1));
     };
     window.addEventListener("wheel", handleWheel, { passive: false });
 
     window.addEventListener("keydown", (event) => {
       const target = event.target instanceof Element ? event.target : null;
-      if (target && target !== document.body && target !== document.documentElement && !target.closest("[data-page-track]")) return;
+      if (isEditableTarget(target)) return;
       if (["ArrowDown", "PageDown"].includes(event.key)) {
         event.preventDefault();
         goTo(activeIndex + 1);
@@ -142,48 +153,63 @@
 
     const navigateFromAnchor = (event) => {
       const anchor = event.currentTarget;
-      const hash = new URL(anchor.href, window.location.href).hash.slice(1);
+      const hash = normalizeSectionId(new URL(anchor.href, window.location.href).hash.slice(1));
       const index = sectionIndexFor(hash);
       if (index < 0) return;
       event.preventDefault();
-      goTo(index);
+      goTo(index, { focusPanel: anchor.matches("[data-nav], .hero-cta, .back-to-top") });
     };
     document.querySelectorAll("a[href*='#']").forEach((anchor) => anchor.addEventListener("click", navigateFromAnchor));
 
     const applyHash = () => {
-      const index = sectionIndexFor(window.location.hash.slice(1));
+      const rawHash = window.location.hash.slice(1);
+      const normalizedHash = normalizeSectionId(rawHash);
+      const index = sectionIndexFor(normalizedHash);
       if (index < 0) return;
+      if (rawHash !== normalizedHash) window.history.replaceState(null, "", `#${normalizedHash}`);
       locked = false;
-      goTo(index, { writeHistory: false });
+      goTo(index, { writeHistory: false, focusPanel: true });
     };
     window.addEventListener("hashchange", applyHash);
     window.addEventListener("popstate", applyHash);
 
     track.addEventListener("touchstart", (event) => {
       if (event.touches.length !== 1) return;
-      touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY, target: event.target };
+      const target = event.target instanceof Element ? event.target : null;
+      touchStart = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+        target,
+        rail: target?.closest(horizontalRailSelector) || null
+      };
     }, { passive: true });
+
     track.addEventListener("touchend", (event) => {
       if (!touchStart || event.changedTouches.length !== 1) return;
       const touch = event.changedTouches[0];
-      const dx = touch.clientX - touchStart.x;
-      const dy = touch.clientY - touchStart.y;
-      const horizontalTarget = touchStart.target instanceof Element
-        ? touchStart.target.closest(".motion-list, .other-grid, .seasonal-rail")
-        : null;
-      if (!horizontalTarget && Math.abs(dy) > 48 && Math.abs(dy) > Math.abs(dx) * 1.15) {
+      const deltaX = touch.clientX - touchStart.x;
+      const deltaY = touch.clientY - touchStart.y;
+      const distanceX = Math.abs(deltaX);
+      const distanceY = Math.abs(deltaY);
+      const verticalSwipe = distanceY >= 40 && distanceY >= distanceX * 1.2;
+      const horizontalSwipe = distanceX > distanceY;
+      const railCanScroll = Boolean(touchStart.rail && touchStart.rail.scrollWidth > touchStart.rail.clientWidth + 1);
+      if (verticalSwipe) {
         event.preventDefault();
-        goTo(activeIndex + (dy < 0 ? 1 : -1));
+        goTo(activeIndex + (deltaY < 0 ? 1 : -1));
+      } else if (horizontalSwipe || railCanScroll) {
+        // Keep the native horizontal rail gesture untouched.
       }
       touchStart = null;
     }, { passive: false });
 
-    track.style.transitionDuration = motionPreference.matches ? "0ms" : `${transitionDuration}ms`;
-    track.style.transform = `translate3d(0, -${activeIndex * 100}%, 0)`;
-    document.body.dataset.activeSection = sections[activeIndex].id;
+    const initialSection = sections[activeIndex];
+    track.dataset.activeIndex = String(activeIndex);
+    document.body.dataset.activeSection = initialSection.id;
     setActiveA11y(activeIndex);
     updateSwitcher(activeIndex);
-    window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: sections[activeIndex].id, index: activeIndex } }));
+    if (window.location.hash.slice(1) === "selected-motion") window.history.replaceState(null, "", "#animation");
+    window.dispatchEvent(new CustomEvent("portfolio:sectionchange", { detail: { id: initialSection.id, index: activeIndex } }));
   }
 
   function renderMotionList() {
@@ -340,19 +366,43 @@
       video.muted = true;
       video.setAttribute("muted", "");
     });
-    if (reducedMotion || !("IntersectionObserver" in window)) return;
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        const video = entry.target;
-        if (entry.isIntersecting) {
+    const pauseAll = () => videos.forEach((video) => video.pause());
+    if (reducedMotion || !("IntersectionObserver" in window)) {
+      pauseAll();
+      return;
+    }
+
+    const playVisible = () => {
+      if (document.body.dataset.activeSection !== "seasonal-posters") {
+        pauseAll();
+        return;
+      }
+      videos.forEach((video) => {
+        const rect = video.getBoundingClientRect();
+        const visible = rect.right > 0 && rect.left < window.innerWidth && rect.bottom > 0 && rect.top < window.innerHeight;
+        if (visible) {
           const playResult = video.play();
           if (playResult && typeof playResult.catch === "function") playResult.catch(() => {});
         } else {
           video.pause();
         }
       });
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (document.body.dataset.activeSection !== "seasonal-posters") {
+          entry.target.pause();
+        } else if (entry.isIntersecting) {
+          const playResult = entry.target.play();
+          if (playResult && typeof playResult.catch === "function") playResult.catch(() => {});
+        } else {
+          entry.target.pause();
+        }
+      });
     }, { threshold: 0.35, rootMargin: "80px 0px" });
     videos.forEach((video) => observer.observe(video));
+    window.addEventListener("portfolio:sectionchange", playVisible);
   }
 
   wireNavigation();

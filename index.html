@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Xiaoying Ye — Motion Graphics Designer and Animator.">
     <title>Xiaoying Ye — Portfolio</title>
-    <link rel="stylesheet" href="./styles/site.css?v=20260831-5">
+    <link rel="stylesheet" href="./styles/site.css?v=20260831-10">
   </head>
   <body data-page="home" data-root=".">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -16,125 +16,119 @@
         </a>
         <nav class="site-nav" aria-label="Primary navigation">
           <a data-nav="home" href="./index.html#home">HOME</a>
-          <a data-nav="work" href="./index.html#selected-motion">WORK</a>
+          <a data-nav="work" href="./index.html#animation">WORK</a>
         </nav>
-        <p class="header-index" aria-hidden="true">01 — 05</p>
+        <p class="header-index" aria-hidden="true">01 — 04</p>
       </header>
 
       <div class="page-viewport">
-      <main id="main" data-page-track>
-        <section class="hero" id="home" aria-labelledby="hero-title">
-          <div class="hero-background" aria-hidden="true">
-            <img src="./assets/images/hero-f26-background.png" alt="" width="4049" height="1080">
-          </div>
-          <div class="hero-grid">
-            <div class="hero-copy">
-              <p class="hero-kicker">Animation Showreel</p>
-              <h1 class="hero-title" id="hero-title">XIAOYING <span>YE</span></h1>
-              <p class="hero-subtitle">Motion Graphics<br>Designer. Animator.</p>
-              <a class="hero-cta" href="#selected-motion">
-                <span>SCROLL TO EXPLORE</span>
-                <svg viewBox="0 0 24 36" aria-hidden="true" focusable="false">
-                  <path d="M12 1v31M5.5 25.5 12 32l6.5-6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
+        <main id="main" data-page-track aria-live="polite">
+          <section class="hero is-active" id="home" aria-labelledby="hero-title" aria-hidden="false" tabindex="0">
+            <div class="hero-background" aria-hidden="true">
+              <img src="./assets/images/hero-rendered-background-v1.png?v=20260831-1" alt="" width="1777" height="885">
+            </div>
+            <div class="hero-grid">
+              <div class="hero-copy">
+                <p class="hero-kicker">Animation Showreel</p>
+                <h1 class="hero-title" id="hero-title">XIAOYING <span>YE</span></h1>
+                <p class="hero-subtitle">Motion Graphics<br>Designer. Animator.</p>
+                <a class="hero-cta" href="#animation">
+                  <span>SCROLL TO EXPLORE</span>
+                  <svg viewBox="0 0 24 36" aria-hidden="true" focusable="false">
+                    <path d="M12 1v31M5.5 25.5 12 32l6.5-6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+            <div class="hero-corner hero-corner--left" aria-hidden="true"></div>
+            <div class="hero-corner hero-corner--right" aria-hidden="true"></div>
+          </section>
+
+          <section class="motion-section" id="animation" aria-labelledby="motion-title" aria-hidden="true" tabindex="-1" inert>
+            <div class="section-heading section-heading--dark">
+              <div>
+                <p class="section-number">02 / 04</p>
+                <h2 id="motion-title">ANIMATION</h2>
+              </div>
+              <p class="section-intro">A selection of personal and<br>collaborative animation projects.</p>
             </div>
 
-            <figure class="hero-art">
-              <div class="hero-art-frame">
-                <img src="./assets/images/poster-jingwei-reclamation.png" alt="Ink landscape from Jingwei Fill the Sea" width="1840" height="1035">
-              </div>
-              <figcaption><span class="accent-rule"></span><span>01 — 05</span></figcaption>
-            </figure>
-
-          </div>
-          <div class="hero-corner hero-corner--left" aria-hidden="true"></div>
-          <div class="hero-corner hero-corner--right" aria-hidden="true"></div>
-        </section>
-
-        <section class="motion-section" id="selected-motion" aria-labelledby="motion-title">
-          <div class="section-heading section-heading--dark">
-            <div>
-              <p class="section-number">02 / 04</p>
-              <h2 id="motion-title">SELECTED <span>MOTION</span></h2>
-            </div>
-            <p class="section-intro">A selection of personal and<br>collaborative animation projects.</p>
-          </div>
-
-          <div class="motion-layout">
-            <div class="motion-stage">
-              <div class="player-frame">
-                <video class="motion-player" data-motion-player preload="metadata" playsinline poster="./assets/images/poster-jingwei-reclamation.png">
-                  <source data-motion-source src="./assets/videos/jingwei-reclamation.mp4" type="video/mp4">
-                  <p>Your browser does not support HTML5 video.</p>
-                </video>
-                <button class="player-toggle" data-motion-play type="button" aria-label="Play 改编动画精卫填海" aria-pressed="false">
-                  <span class="player-toggle-icon" data-motion-play-icon aria-hidden="true"></span>
-                  <span>PLAY FILM</span>
-                </button>
-              </div>
-
-              <div class="player-progress" data-motion-progress-wrap>
-                <label class="sr-only" for="motion-seek">Seek selected motion</label>
-                <input class="seek-control seek-control--dark" id="motion-seek" data-motion-seek type="range" min="0" max="213" value="0" step="0.01" aria-label="Seek selected motion">
-                <div class="player-time"><span data-motion-current>00:00</span><span aria-hidden="true"> / </span><span data-motion-duration>03:33</span></div>
-              </div>
-
-              <div class="motion-details">
-                <div class="motion-title-block">
-                  <p class="motion-current-number" data-motion-number>01</p>
-                  <div>
-                    <h3 data-motion-title>改编动画精卫填海</h3>
-                    <p class="motion-subtitle" data-motion-subtitle>Jingwei Fill the Sea</p>
-                  </div>
+            <div class="motion-layout">
+              <div class="motion-stage">
+                <div class="player-frame">
+                  <video class="motion-player" data-motion-player preload="metadata" playsinline poster="./assets/images/poster-jingwei-reclamation.png">
+                    <source data-motion-source src="./assets/videos/jingwei-reclamation.mp4" type="video/mp4">
+                    <p>Your browser does not support HTML5 video.</p>
+                  </video>
+                  <button class="player-toggle" data-motion-play type="button" aria-label="Play 改编动画精卫填海" aria-pressed="false">
+                    <span class="player-toggle-icon" data-motion-play-icon aria-hidden="true"></span>
+                    <span>PLAY FILM</span>
+                  </button>
                 </div>
-                <time class="motion-duration" data-motion-duration-label datetime="PT213S">03:33</time>
-                <p class="motion-description" data-motion-description></p>
+
+                <div class="player-progress" data-motion-progress-wrap>
+                  <label class="sr-only" for="motion-seek">Seek selected animation</label>
+                  <input class="seek-control seek-control--dark" id="motion-seek" data-motion-seek type="range" min="0" max="213" value="0" step="0.01" aria-label="Seek selected animation">
+                  <div class="player-time"><span data-motion-current>00:00</span><span aria-hidden="true"> / </span><span data-motion-duration>03:33</span></div>
+                </div>
+
+                <div class="motion-details">
+                  <div class="motion-title-block">
+                    <p class="motion-current-number" data-motion-number>01</p>
+                    <div>
+                      <h3 data-motion-title>改编动画精卫填海</h3>
+                      <p class="motion-subtitle" data-motion-subtitle>Jingwei Fill the Sea</p>
+                    </div>
+                  </div>
+                  <time class="motion-duration" data-motion-duration-label datetime="PT213S">03:33</time>
+                  <p class="motion-description" data-motion-description></p>
+                </div>
               </div>
-            </div>
 
-            <aside class="motion-index" aria-label="Selected motion projects">
-              <div class="motion-index-head"><span>INDEX</span><span>05 WORKS</span></div>
-              <div class="motion-list" data-motion-list></div>
-            </aside>
-          </div>
-        </section>
-
-        <section class="other-section" id="other-works" aria-labelledby="other-title">
-          <div class="section-heading section-heading--paper">
-            <div>
-              <p class="section-number">03 / 04</p>
-              <h2 id="other-title">OTHER <span>WORKS</span></h2>
-              <p class="section-subtitle">其他类型作品</p>
+              <aside class="motion-index" aria-label="Animation projects">
+                <div class="motion-index-head"><span>INDEX</span><span>05 WORKS</span></div>
+                <div class="motion-list" data-motion-list></div>
+              </aside>
             </div>
-            <p class="section-note">Graphic / Packaging / Illustration / Process</p>
-          </div>
-          <div class="other-grid" data-other-grid></div>
-        </section>
+          </section>
 
-        <section class="seasonal-section" id="seasonal-posters" aria-labelledby="seasonal-title">
-          <div class="section-heading section-heading--dark seasonal-heading">
-            <div>
-              <p class="section-number">04 / 04</p>
-              <h2 id="seasonal-title">SEASONAL <span>POSTERS</span></h2>
-              <p class="seasonal-title-cn">二十四节气</p>
+          <section class="seasonal-section" id="seasonal-posters" aria-labelledby="seasonal-title" aria-hidden="true" tabindex="-1" inert>
+            <div class="section-heading section-heading--dark seasonal-heading">
+              <div>
+                <p class="section-number">03 / 04</p>
+                <h2 id="seasonal-title">SEASONAL <span>POSTERS</span></h2>
+                <p class="seasonal-title-cn">动效海报</p>
+              </div>
+              <p class="section-intro">An animated poster series<br>following the solar terms.</p>
             </div>
-            <p class="section-intro">An animated poster series<br>following the solar terms.</p>
-          </div>
-          <div class="seasonal-rail" data-seasonal-rail aria-label="Seasonal poster series"></div>
-          <p class="rail-hint"><span aria-hidden="true">←</span> DRAG TO EXPLORE <span aria-hidden="true">→</span></p>
-          <footer class="site-footer">
-            <a href="mailto:yxyjoyce@qq.com">yxyjoyce@qq.com</a>
-            <a class="back-to-top" href="#home">BACK TO TOP <span aria-hidden="true">↗</span></a>
-            <p>© 2021 by Xiaoying Ye.</p>
-          </footer>
-        </section>
-      </main>
+            <div class="seasonal-rail" data-seasonal-rail aria-label="Seasonal poster series"></div>
+            <p class="rail-hint"><span aria-hidden="true">←</span> DRAG TO EXPLORE <span aria-hidden="true">→</span></p>
+          </section>
+
+          <section class="other-section" id="other-works" aria-labelledby="other-title" aria-hidden="true" tabindex="-1" inert>
+            <div class="section-heading section-heading--paper">
+              <div>
+                <p class="section-number">04 / 04</p>
+                <h2 id="other-title">OTHER <span>WORKS</span></h2>
+                <p class="section-subtitle">其他类型作品</p>
+              </div>
+              <p class="section-note">Graphic / Packaging / Illustration / Process</p>
+            </div>
+            <div class="other-rail">
+              <div class="other-grid" data-other-grid aria-label="Other works"></div>
+            </div>
+            <footer class="site-footer">
+              <a href="mailto:yxyjoyce@qq.com">yxyjoyce@qq.com</a>
+              <a class="back-to-top" href="#home">BACK TO TOP <span aria-hidden="true">↗</span></a>
+              <p>© 2021 by Xiaoying Ye.</p>
+            </footer>
+          </section>
+        </main>
       </div>
 
       <div class="page-switcher" aria-live="polite">
         <span data-page-count>01 / 04</span>
-        <button data-page-next type="button" aria-label="Go to selected motion">
+        <button data-page-next type="button" aria-label="Go to animation">
           <span data-page-next-label>NEXT SECTION</span>
           <span class="page-switcher-arrow" aria-hidden="true">↓</span>
         </button>
@@ -142,6 +136,6 @@
     </div>
 
     <script src="./data/works.js"></script>
-    <script src="./scripts/site.js"></script>
+    <script src="./scripts/site.js?v=20260831-6"></script>
   </body>
 </html>
