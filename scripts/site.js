@@ -57,11 +57,10 @@
     const nextLabel = document.querySelector("[data-page-next-label]");
     const pageCount = document.querySelector("[data-page-count]");
     const track = document.querySelector("[data-page-track]");
-    const curtain = document.querySelector("[data-panel-curtain]");
-    if (sections.length === 0 || !nextButton || !nextLabel || !pageCount || !track || !curtain) return;
+    if (sections.length === 0 || !nextButton || !nextLabel || !pageCount || !track) return;
 
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const commitDelay = 260;
+    const transitionDuration = 420;
     const horizontalRailSelector = ".motion-list, .other-rail, .other-grid, .seasonal-rail";
     const initialHash = normalizeSectionId(window.location.hash.slice(1));
     const initialIndex = sections.findIndex((section) => section.id === initialHash);
@@ -69,7 +68,6 @@
     let locked = false;
     let touchStart = null;
     let transitionTimer = 0;
-    let commitTimer = 0;
     let queuedNavigation = null;
 
     const sectionIndexFor = (id) => sections.findIndex((section) => section.id === normalizeSectionId(id));
@@ -100,8 +98,6 @@
 
     const clearTransition = () => {
       window.clearTimeout(transitionTimer);
-      window.clearTimeout(commitTimer);
-      curtain.classList.remove("is-active", "is-covering", "is-revealing");
       document.body.removeAttribute("data-transitioning");
       document.body.removeAttribute("data-transition-direction");
       document.body.removeAttribute("data-transition-target");
@@ -122,7 +118,6 @@
       nextSection.classList.add("is-entering");
       activeIndex = nextIndex;
       setActiveA11y(activeIndex);
-      oldSection?.classList.remove("is-exiting");
       track.dataset.activeIndex = String(activeIndex);
       document.body.dataset.activeSection = nextSection.id;
       if (writeHistory) window.history.pushState(null, "", `#${nextSection.id}`);
@@ -132,7 +127,7 @@
     };
 
     const completeReduced = (oldSection, nextSection) => {
-      window.setTimeout(() => finishTransition(oldSection, nextSection), 100);
+      transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), 100);
     };
 
     const goTo = (requestedIndex, { writeHistory = true, focusPanel = false } = {}) => {
@@ -147,35 +142,21 @@
       const oldSection = sections[oldIndex];
       const nextSection = sections[nextIndex];
       const direction = nextIndex > oldIndex ? "forward" : "backward";
+      document.body.dataset.transitionDirection = direction;
+      document.body.dataset.transitionTarget = nextSection.id;
       if (motionPreference.matches) {
+        document.body.dataset.transitioning = "reduced";
         oldSection.classList.add("is-exiting");
         commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
         completeReduced(oldSection, nextSection);
         return;
       }
 
-      document.body.dataset.transitionDirection = direction;
-      document.body.dataset.transitionTarget = nextSection.id;
-      document.body.dataset.transitioning = "covering";
-      curtain.classList.add("is-active", "is-covering");
+      document.body.dataset.transitioning = "content";
       oldSection.classList.add("is-exiting");
-      commitTimer = window.setTimeout(() => {
-        if (!locked) return;
-        commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
-        document.body.dataset.transitioning = "revealing";
-        curtain.classList.remove("is-covering");
-        curtain.classList.add("is-revealing");
-      }, commitDelay);
-      transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), 900);
+      commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
+      transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), transitionDuration);
     };
-
-    curtain.addEventListener("animationend", (event) => {
-      if (!curtain.classList.contains("is-revealing") || event.animationName.indexOf("curtain-reveal") !== 0) return;
-      const visibleSlats = [...curtain.querySelectorAll(".panel-curtain-slat")]
-        .filter((slat) => getComputedStyle(slat).display !== "none");
-      if (event.target !== visibleSlats.at(-1)) return;
-      finishTransition(sections.find((section) => section.classList.contains("is-exiting")), sections[activeIndex]);
-    });
 
     const isEditableTarget = (target) => target?.closest("input, textarea, select, [contenteditable=\"true\"]");
 
