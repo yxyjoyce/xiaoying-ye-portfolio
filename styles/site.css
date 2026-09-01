@@ -2026,7 +2026,7 @@ body[data-active-section="other-works"] .page-switcher {
   }
 }
 
-@media (max-width: 620px) and (max-height: 760px) {
+@media (max-width: 620px) and (max-height: 900px) {
   .motion-section {
     padding-top: calc(var(--header-height) + 8px);
     padding-bottom: calc(54px + env(safe-area-inset-bottom));
@@ -2051,7 +2051,7 @@ body[data-active-section="other-works"] .page-switcher {
   }
 
   .motion-section .player-frame {
-    width: min(100%, 50dvh);
+    width: min(100%, max(280px, 38dvh));
     margin-inline: auto;
   }
 
