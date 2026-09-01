@@ -239,16 +239,18 @@
       const verticalSwipe = distanceY >= 40 && distanceY >= distanceX * 1.2;
       const horizontalSwipe = distanceX > distanceY;
       const railCanScroll = Boolean(touchStart.rail && touchStart.rail.scrollWidth > touchStart.rail.clientWidth + 1);
-      if (touchStart.rail && railCanScroll) {
-        // Any gesture that starts on a horizontal work rail belongs to the rail.
-      } else if (verticalSwipe) {
+      if (verticalSwipe) {
         event.preventDefault();
         goTo(activeIndex + (deltaY < 0 ? 1 : -1));
-      } else if (horizontalSwipe || railCanScroll) {
+      } else if (horizontalSwipe && railCanScroll) {
         // Keep the native horizontal rail gesture untouched.
       }
       touchStart = null;
     }, { passive: false });
+
+    track.addEventListener("touchcancel", () => {
+      touchStart = null;
+    }, { passive: true });
 
     const initialSection = sections[activeIndex];
     track.dataset.activeIndex = String(activeIndex);
