@@ -60,7 +60,7 @@
     if (sections.length === 0 || !nextButton || !nextLabel || !pageCount || !track) return;
 
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const transitionDuration = 420;
+    const transitionDuration = 520;
     const horizontalRailSelector = ".motion-list, .other-rail, .other-grid, .seasonal-rail";
     const initialHash = normalizeSectionId(window.location.hash.slice(1));
     const initialIndex = sections.findIndex((section) => section.id === initialHash);

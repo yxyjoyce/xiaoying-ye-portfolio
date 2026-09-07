@@ -1496,18 +1496,14 @@ main[data-page-track] > section[aria-hidden="true"] {
   }
 }
 
-/* Content-layer handoff: the old and new panels remain in the same viewport.
-   Forward motion rises out; backward motion settles down. */
+/* Content-layer handoff: panels stay in place while local modules exchange
+   in staggered beats. The scan is a line, never a page mask. */
 main[data-page-track] > section.is-exiting {
   z-index: 2;
   visibility: visible;
   opacity: 1;
   pointer-events: none;
-  animation: panel-old-out-forward 420ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
-}
-
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting {
-  animation-name: panel-old-out-backward;
+  transition: none;
 }
 
 main[data-page-track] > section.is-entering {
@@ -1515,101 +1511,166 @@ main[data-page-track] > section.is-entering {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  animation: panel-new-in-forward 420ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  transition: none;
 }
 
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering {
-  animation-name: panel-new-in-backward;
+main[data-page-track]::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  height: 2px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(90deg, transparent, var(--red) 18%, var(--red) 82%, transparent);
+  box-shadow: 0 0 13px rgba(214, 64, 45, 0.35);
+  opacity: 0;
+  visibility: hidden;
 }
 
-main[data-page-track] > section.is-exiting .hero-copy,
-main[data-page-track] > section.is-exiting .section-heading,
-main[data-page-track] > section.is-exiting .motion-stage,
-main[data-page-track] > section.is-exiting .seasonal-rail,
-main[data-page-track] > section.is-exiting .other-rail,
-main[data-page-track] > section.is-exiting .motion-index,
-main[data-page-track] > section.is-exiting .rail-hint,
-main[data-page-track] > section.is-exiting .site-footer {
-  animation: content-handoff-exit-forward 420ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+body[data-transitioning="content"] main[data-page-track]::after {
+  visibility: visible;
+  animation: panel-scan-forward 430ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .hero-copy,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .section-heading,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .motion-stage,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .seasonal-rail,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .other-rail,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .motion-index,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .rail-hint,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .site-footer {
+body[data-transitioning="content"][data-transition-direction="backward"] main[data-page-track]::after {
+  animation-name: panel-scan-backward;
+}
+
+main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer),
+main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+  --handoff-delay: 96ms;
+  animation-duration: 330ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-delay: var(--handoff-delay);
+  animation-fill-mode: both;
+}
+
+main[data-page-track] > section.is-exiting :is(.motion-index, .hero-corner, .site-footer),
+main[data-page-track] > section.is-entering :is(.motion-index, .hero-corner, .site-footer) {
+  --handoff-delay: 0ms;
+}
+
+main[data-page-track] > section.is-exiting :is(.player-progress, .motion-details, .rail-hint),
+main[data-page-track] > section.is-entering :is(.player-progress, .motion-details, .rail-hint) {
+  --handoff-delay: 32ms;
+}
+
+main[data-page-track] > section.is-exiting :is(.player-frame, .seasonal-rail, .other-rail),
+main[data-page-track] > section.is-entering :is(.player-frame, .seasonal-rail, .other-rail) {
+  --handoff-delay: 64ms;
+}
+
+main[data-page-track] > section.is-exiting :is(.hero-copy, .section-heading),
+main[data-page-track] > section.is-entering :is(.hero-copy, .section-heading) {
+  --handoff-delay: 96ms;
+}
+
+body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.motion-index, .hero-corner, .site-footer),
+body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.motion-index, .hero-corner, .site-footer) {
+  --handoff-delay: 96ms;
+}
+
+body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.player-progress, .motion-details, .rail-hint),
+body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.player-progress, .motion-details, .rail-hint) {
+  --handoff-delay: 64ms;
+}
+
+body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.player-frame, .seasonal-rail, .other-rail),
+body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.player-frame, .seasonal-rail, .other-rail) {
+  --handoff-delay: 32ms;
+}
+
+body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.hero-copy, .section-heading),
+body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.hero-copy, .section-heading) {
+  --handoff-delay: 0ms;
+}
+
+main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+  animation-name: content-handoff-exit-forward;
+}
+
+main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+  animation-name: content-handoff-enter-forward;
+}
+
+body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
   animation-name: content-handoff-exit-backward;
 }
 
-main[data-page-track] > section.is-entering .section-heading,
-main[data-page-track] > section.is-entering .hero-copy {
-  animation: content-handoff-forward 380ms cubic-bezier(0.22, 0.61, 0.36, 1) 30ms both;
+body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+  animation-name: content-handoff-enter-backward;
 }
 
-main[data-page-track] > section.is-entering .motion-stage,
-main[data-page-track] > section.is-entering .seasonal-rail,
-main[data-page-track] > section.is-entering .other-rail {
-  animation: content-handoff-forward 380ms cubic-bezier(0.22, 0.61, 0.36, 1) 40ms both;
+main[data-page-track] > section.is-exiting.hero,
+main[data-page-track] > section.is-exiting.motion-section,
+main[data-page-track] > section.is-exiting.seasonal-section,
+main[data-page-track] > section.is-exiting.other-section {
+  background: transparent;
 }
 
-main[data-page-track] > section.is-entering .motion-index,
-main[data-page-track] > section.is-entering .rail-hint,
-main[data-page-track] > section.is-entering .site-footer {
-  animation: content-handoff-forward 350ms cubic-bezier(0.22, 0.61, 0.36, 1) 70ms both;
+main[data-page-track] > section.is-exiting .hero-background {
+  animation: handoff-hero-background 180ms ease-out both;
 }
 
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .section-heading,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .hero-copy,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .motion-stage,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .seasonal-rail,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .other-rail,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .motion-index,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .rail-hint,
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .site-footer {
-  animation-name: content-handoff-backward;
+main[data-page-track] > section.is-exiting.motion-section::before,
+main[data-page-track] > section.is-exiting.seasonal-section::before {
+  animation: handoff-dark-texture 180ms ease-out both;
 }
 
-@keyframes panel-old-out-forward {
-  from { opacity: 1; }
-  to { opacity: 0; }
+main[data-page-track] > section.is-exiting.other-section::before {
+  animation: handoff-paper-decoration 180ms ease-out both;
 }
 
-@keyframes panel-old-out-backward {
-  from { opacity: 1; }
-  to { opacity: 0; }
+@keyframes panel-scan-forward {
+  0% { transform: translateY(calc(100dvh - 2px)); opacity: 0; }
+  12% { opacity: 0.9; }
+  86% { opacity: 0.9; }
+  100% { transform: translateY(-1px); opacity: 0; }
 }
 
-@keyframes panel-new-in-forward {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes panel-scan-backward {
+  0% { transform: translateY(-1px); opacity: 0; }
+  12% { opacity: 0.9; }
+  86% { opacity: 0.9; }
+  100% { transform: translateY(calc(100dvh - 2px)); opacity: 0; }
 }
 
-@keyframes panel-new-in-backward {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes content-handoff-enter-forward {
+  from { clip-path: inset(24% 0 0 0); opacity: 0; transform: translateY(10px); }
+  to { clip-path: inset(0); opacity: 1; transform: translateY(0); }
 }
 
-@keyframes content-handoff-forward {
-  from { transform: translateY(8px); }
-  to { transform: translateY(0); }
-}
-
-@keyframes content-handoff-backward {
-  from { transform: translateY(-8px); }
-  to { transform: translateY(0); }
+@keyframes content-handoff-enter-backward {
+  from { clip-path: inset(0 0 24% 0); opacity: 0; transform: translateY(-10px); }
+  to { clip-path: inset(0); opacity: 1; transform: translateY(0); }
 }
 
 @keyframes content-handoff-exit-forward {
-  from { transform: translateY(0); }
-  to { transform: translateY(-12px); }
+  from { clip-path: inset(0); opacity: 1; transform: translateY(0); }
+  to { clip-path: inset(0 0 24% 0); opacity: 0; transform: translateY(-10px); }
 }
 
 @keyframes content-handoff-exit-backward {
-  from { transform: translateY(0); }
-  to { transform: translateY(12px); }
+  from { clip-path: inset(0); opacity: 1; transform: translateY(0); }
+  to { clip-path: inset(24% 0 0 0); opacity: 0; transform: translateY(10px); }
+}
+
+@keyframes handoff-hero-background {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes handoff-dark-texture {
+  from { opacity: 0.035; }
+  to { opacity: 0; }
+}
+
+@keyframes handoff-paper-decoration {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .motion-section,
@@ -2043,14 +2104,33 @@ body[data-active-section="other-works"] .page-switcher {
     opacity: 0;
   }
 
+  main[data-page-track]::after {
+    display: none !important;
+    animation: none !important;
+  }
+
   main[data-page-track] > section.is-entering {
     opacity: 1;
   }
 
-  main[data-page-track] > section.is-entering :is(.hero-copy, .section-heading, .motion-stage, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer),
-  main[data-page-track] > section.is-exiting :is(.hero-copy, .section-heading, .motion-stage, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+  main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer),
+  main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
     animation: none !important;
+    clip-path: none !important;
+    opacity: 1 !important;
     transform: none !important;
+  }
+
+  main[data-page-track] > section.is-exiting .hero-background,
+  main[data-page-track] > section.is-exiting.other-section::before {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  main[data-page-track] > section.is-exiting.motion-section::before,
+  main[data-page-track] > section.is-exiting.seasonal-section::before {
+    animation: none !important;
+    opacity: 0.035 !important;
   }
 
   .motion-dialog[open] {

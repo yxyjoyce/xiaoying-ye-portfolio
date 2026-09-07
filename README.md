@@ -6,7 +6,7 @@
 
 - 根页面 `index.html` 是唯一可见作品集页面。
 - 导航只保留 `HOME` 与 `WORK`；`WORK` 指向 `#animation`，旧锚点 `#selected-motion` 会兼容跳转到 `#animation`。
-- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`，不使用整屏纵向 track 滚动。切屏是背景原地交叉淡变与内容层交接：panel 本身只以 `opacity` 在约 420ms 内交叉淡变；前进时旧内容层上移约 12px、新内容层从下方约 8–12px 淡入，返回方向反向。标题、主播放器/横向轨道、索引与页脚辅助内容分别以约 30/40/70ms 轻量错时进入，各内容层独立动画，不移动父级 layout wrapper；不使用全屏幕布、朱砂扫线、`filter`、`clip-path`、`scale` 或大尺度移动。`prefers-reduced-motion` 下只保留不超过 100ms 的无位移淡变。鼠标滚轮、键盘方向键/Home/End/PageUp/PageDown 和页面上的切换按钮都会逐屏切换。手机触摸仅在纵向占优且 `abs(deltaY) >= 40px`、`abs(deltaY) >= abs(deltaX) * 1.2` 时切一屏；Seasonal/Other/Animation rail 保留原生横向触摸滚动，不用全局 `touchmove` 粗暴拦截。
+- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`，不使用整屏纵向 track 滚动。页面转换总时长约 520ms：前进时横向扫描线由下向上，返回时由上向下；标题、主播放器/横向轨道、详情、索引、装饰与页脚按 32ms 间隔分别使用局部 `clip-path`、约 10px 位移和透明度错时进入/退出。扫描线只串联节奏，不作为整页遮罩；panel 本身不平移、不缩放、不做整页裁切或整体淡变，旧页也不压暗。`prefers-reduced-motion` 下禁用扫描、局部裁切与位移，只保留不超过 100ms 的淡变。鼠标滚轮、键盘方向键/Home/End/PageUp/PageDown 和页面上的切换按钮都会逐屏切换。手机触摸仅在纵向占优且 `abs(deltaY) >= 40px`、`abs(deltaY) >= abs(deltaX) * 1.2` 时切一屏；Seasonal/Other/Animation rail 保留原生横向触摸滚动，不用全局 `touchmove` 粗暴拦截。
 - `Seasonal Posters` 位于 `#seasonal-posters`，`Other Works` 位于 `#other-works`，末页按钮为 `BACK TO TOP`。
 - 页脚仅包含 `yxyjoyce@qq.com`、`BACK TO TOP` 与 `© 2021 by Xiaoying Ye.`。
 - `additional-works/index.html` 相对路径跳转到 `../index.html#other-works`；`about/index.html` 与 `contact/index.html` 相对路径跳转到 `../index.html#home`，兼容旧链接及 `file://` 直接打开。
@@ -33,7 +33,7 @@ node server.mjs
 
 Hero 背景使用用户确认效果图提取的 ImageGen 成品 `assets/images/hero-rendered-background-v1.png`（1777×885），不再引用旧 `hero-f26-background.png` 透明增强图或旧精卫矩形截图。成品背景直接以 `object-fit: cover` 显示，桌面完整宽幅覆盖，手机以 `object-position: 62% center` 保证主峰可见；不再使用 `multiply`、mask 或明显 blur 重构山形。页面暖米白基准保持为 `#f4efe5`，项目中的原始 GIF、`E:\作品` 素材与旧 F26 派生 PNG 均保留但不写回/不引用。
 Animation 手机端按“标题 → 16:9 播放器 → 紧凑信息 → 缩略图 rail”排布，完整介绍通过原生底部 `dialog` 抽屉查看；Seasonal 桌面约三张完整卡片加下一张露边，手机卡片约 82vw；Other Works 手机卡片约 84vw。桌面窄高度使用 `max-height: 760px` 紧凑规则，末屏页脚与切换按钮各自占位，避免覆盖。
-HTML 为变更后的 CSS 与 Hero 派生 PNG 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本分别为 `?v=20260901-16` 与 `?v=20260901-11`。
+HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本均为 `?v=20260907-01`。
 
 ## GitHub Pages 发布副本
 
@@ -45,11 +45,11 @@ HTML 为变更后的 CSS 与 Hero 派生 PNG 使用版本查询参数主动绕�
 - [MDN CSS 与 JavaScript 无障碍](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/CSS_and_JavaScript)：panel 切换同步 `aria-hidden`、`inert` 与焦点，避免隐藏内容继续进入辅助技术和键盘顺序。
 - [MDN wheel 事件](https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event)：滚轮监听按垂直方向逐屏切换，并只在需要时取消默认行为；作品 rail 保留原生横向滚动。
 - [MDN Scrollbars styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling)：Seasonal/Other 使用原生 `overflow-x: auto` 滚动条，并以红色 thumb 和灰色 track 保持可见对比。
-- [web.dev 高性能 CSS 动画指南](https://web.dev/articles/animations-guide)：确认交接只使用 `opacity` 与 `transform`，避免触发布局或绘制的动画属性。
+- [MDN `clip-path`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/clip-path) 与 [`inset()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/basic-shape/inset)：确认矩形基本形状可以动画，用于每个内容模块自身边界内的局部揭示，不裁切整个 panel。
 - [MDN `prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion)：确认减少动画偏好应替换或缩短非必要位移，采用不超过 100ms 的无位移淡变。
 - [Android Navigation forward/back transitions](https://developer.android.com/guide/navigation/navigation-3/animate-destinations)：以 forward 与 pop/back 分离的进入/退出方向作为内容层交接的交互依据。
 
-最终不采用 View Transition API、GSAP、WebGL 或全屏遮罩。纸面交接方案采用同一视口内背景原地交叉淡变与旧/新内容层交接，保留低依赖、离线和 GitHub Pages 运行边界；本轮只做代码级审查，页面实际检验由用户自行完成。
+最终不采用 View Transition API、GSAP、WebGL、开场加载页或全屏遮罩。当前方案以原生 CSS 扫描线统一节奏，各内容模块独立错时揭示，保留低依赖、离线和 GitHub Pages 运行边界；本轮只做代码级审查，页面实际检验由用户自行完成。
 
 ## 验证
 
