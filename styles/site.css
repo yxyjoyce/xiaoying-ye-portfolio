@@ -1539,68 +1539,29 @@ body[data-transitioning="content"][data-transition-direction="backward"] main[da
   animation-name: panel-scan-backward;
 }
 
-main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer),
-main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
-  --handoff-delay: 96ms;
-  animation-duration: 330ms;
+main[data-page-track] > section.is-exiting .is-handoff-leaf,
+main[data-page-track] > section.is-entering .is-handoff-leaf {
+  animation-duration: 210ms;
   animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
-  animation-delay: var(--handoff-delay);
+  animation-delay: var(--handoff-delay, 0ms);
   animation-fill-mode: both;
 }
 
-main[data-page-track] > section.is-exiting :is(.motion-index, .hero-corner, .site-footer),
-main[data-page-track] > section.is-entering :is(.motion-index, .hero-corner, .site-footer) {
-  --handoff-delay: 0ms;
-}
-
-main[data-page-track] > section.is-exiting :is(.player-progress, .motion-details, .rail-hint),
-main[data-page-track] > section.is-entering :is(.player-progress, .motion-details, .rail-hint) {
-  --handoff-delay: 32ms;
-}
-
-main[data-page-track] > section.is-exiting :is(.player-frame, .seasonal-rail, .other-rail),
-main[data-page-track] > section.is-entering :is(.player-frame, .seasonal-rail, .other-rail) {
-  --handoff-delay: 64ms;
-}
-
-main[data-page-track] > section.is-exiting :is(.hero-copy, .section-heading),
-main[data-page-track] > section.is-entering :is(.hero-copy, .section-heading) {
-  --handoff-delay: 96ms;
-}
-
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.motion-index, .hero-corner, .site-footer),
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.motion-index, .hero-corner, .site-footer) {
-  --handoff-delay: 96ms;
-}
-
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.player-progress, .motion-details, .rail-hint),
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.player-progress, .motion-details, .rail-hint) {
-  --handoff-delay: 64ms;
-}
-
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.player-frame, .seasonal-rail, .other-rail),
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.player-frame, .seasonal-rail, .other-rail) {
-  --handoff-delay: 32ms;
-}
-
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.hero-copy, .section-heading),
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.hero-copy, .section-heading) {
-  --handoff-delay: 0ms;
-}
-
-main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+main[data-page-track] > section.is-exiting .is-handoff-leaf {
   animation-name: content-handoff-exit-forward;
+  animation-duration: 180ms;
+  animation-delay: var(--handoff-exit-delay, 0ms);
 }
 
-main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+main[data-page-track] > section.is-entering .is-handoff-leaf {
   animation-name: content-handoff-enter-forward;
 }
 
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .is-handoff-leaf {
   animation-name: content-handoff-exit-backward;
 }
 
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .is-handoff-leaf {
   animation-name: content-handoff-enter-backward;
 }
 
@@ -1639,23 +1600,23 @@ main[data-page-track] > section.is-exiting.other-section::before {
 }
 
 @keyframes content-handoff-enter-forward {
-  from { clip-path: inset(24% 0 0 0); opacity: 0; transform: translateY(10px); }
-  to { clip-path: inset(0); opacity: 1; transform: translateY(0); }
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0); }
 }
 
 @keyframes content-handoff-enter-backward {
-  from { clip-path: inset(0 0 24% 0); opacity: 0; transform: translateY(-10px); }
-  to { clip-path: inset(0); opacity: 1; transform: translateY(0); }
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0); }
 }
 
 @keyframes content-handoff-exit-forward {
-  from { clip-path: inset(0); opacity: 1; transform: translateY(0); }
-  to { clip-path: inset(0 0 24% 0); opacity: 0; transform: translateY(-10px); }
+  from { clip-path: inset(0); }
+  to { clip-path: inset(0 0 100% 0); }
 }
 
 @keyframes content-handoff-exit-backward {
-  from { clip-path: inset(0); opacity: 1; transform: translateY(0); }
-  to { clip-path: inset(24% 0 0 0); opacity: 0; transform: translateY(10px); }
+  from { clip-path: inset(0); }
+  to { clip-path: inset(100% 0 0 0); }
 }
 
 @keyframes handoff-hero-background {
@@ -2113,8 +2074,8 @@ body[data-active-section="other-works"] .page-switcher {
     opacity: 1;
   }
 
-  main[data-page-track] > section.is-entering :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer),
-  main[data-page-track] > section.is-exiting :is(.hero-copy, .hero-corner, .section-heading, .player-frame, .player-progress, .motion-details, .motion-index, .seasonal-rail, .other-rail, .rail-hint, .site-footer) {
+  main[data-page-track] > section.is-entering .is-handoff-leaf,
+  main[data-page-track] > section.is-exiting .is-handoff-leaf {
     animation: none !important;
     clip-path: none !important;
     opacity: 1 !important;

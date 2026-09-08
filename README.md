@@ -6,7 +6,7 @@
 
 - 根页面 `index.html` 是唯一可见作品集页面。
 - 导航只保留 `HOME` 与 `WORK`；`WORK` 指向 `#animation`，旧锚点 `#selected-motion` 会兼容跳转到 `#animation`。
-- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`，不使用整屏纵向 track 滚动。页面转换总时长约 520ms：前进时横向扫描线由下向上，返回时由上向下；标题、主播放器/横向轨道、详情、索引、装饰与页脚按 32ms 间隔分别使用局部 `clip-path`、约 10px 位移和透明度错时进入/退出。扫描线只串联节奏，不作为整页遮罩；panel 本身不平移、不缩放、不做整页裁切或整体淡变，旧页也不压暗。`prefers-reduced-motion` 下禁用扫描、局部裁切与位移，只保留不超过 100ms 的淡变。鼠标滚轮、键盘方向键/Home/End/PageUp/PageDown 和页面上的切换按钮都会逐屏切换。手机触摸仅在纵向占优且 `abs(deltaY) >= 40px`、`abs(deltaY) >= abs(deltaX) * 1.2` 时切一屏；Seasonal/Other/Animation rail 保留原生横向触摸滚动，不用全局 `touchmove` 粗暴拦截。
+- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`，不使用整屏纵向 track 滚动。主转换基准为 520ms，清理时间按最后一个元素动画结束计算：前进时横向扫描线由下向上，返回时由上向下；标题编号/标题/说明、详情字段、逐张海报与索引卡片、页脚各项目使用完整局部裁切分别揭开；组间隔 80ms、同组元素间隔 50ms，单项进入 210ms、退出 180ms。扫描线只串联节奏，不作为整页遮罩；panel 本身不平移、不缩放、不做整页裁切或整体淡变，旧页也不压暗。`prefers-reduced-motion` 下禁用扫描、局部裁切与位移，只保留不超过 100ms 的淡变。鼠标滚轮、键盘方向键/Home/End/PageUp/PageDown 和页面上的切换按钮都会逐屏切换。手机触摸仅在纵向占优且 `abs(deltaY) >= 40px`、`abs(deltaY) >= abs(deltaX) * 1.2` 时切一屏；Seasonal/Other/Animation rail 保留原生横向触摸滚动，不用全局 `touchmove` 粗暴拦截。
 - `Seasonal Posters` 位于 `#seasonal-posters`，`Other Works` 位于 `#other-works`，末页按钮为 `BACK TO TOP`。
 - 页脚仅包含 `yxyjoyce@qq.com`、`BACK TO TOP` 与 `© 2021 by Xiaoying Ye.`。
 - `additional-works/index.html` 相对路径跳转到 `../index.html#other-works`；`about/index.html` 与 `contact/index.html` 相对路径跳转到 `../index.html#home`，兼容旧链接及 `file://` 直接打开。
@@ -33,7 +33,7 @@ node server.mjs
 
 Hero 背景使用用户确认效果图提取的 ImageGen 成品 `assets/images/hero-rendered-background-v1.png`（1777×885），不再引用旧 `hero-f26-background.png` 透明增强图或旧精卫矩形截图。成品背景直接以 `object-fit: cover` 显示，桌面完整宽幅覆盖，手机以 `object-position: 62% center` 保证主峰可见；不再使用 `multiply`、mask 或明显 blur 重构山形。页面暖米白基准保持为 `#f4efe5`，项目中的原始 GIF、`E:\作品` 素材与旧 F26 派生 PNG 均保留但不写回/不引用。
 Animation 手机端按“标题 → 16:9 播放器 → 紧凑信息 → 缩略图 rail”排布，完整介绍通过原生底部 `dialog` 抽屉查看；Seasonal 桌面约三张完整卡片加下一张露边，手机卡片约 82vw；Other Works 手机卡片约 84vw。桌面窄高度使用 `max-height: 760px` 紧凑规则，末屏页脚与切换按钮各自占位，避免覆盖。
-HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本均为 `?v=20260907-01`。
+HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本均为 `?v=20260908-01`。
 
 ## GitHub Pages 发布副本
 

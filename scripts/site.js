@@ -69,6 +69,60 @@
     let touchStart = null;
     let transitionTimer = 0;
     let queuedNavigation = null;
+    const handoffLeafSelector = [
+      ".hero-kicker", ".hero-title", ".hero-subtitle", ".hero-cta", ".hero-corner",
+      ".section-number", ".section-heading h2", ".seasonal-title-cn", ".section-subtitle", ".section-intro", ".section-note",
+      ".player-frame", ".player-progress",
+      ".motion-current-number", ".motion-title-block h3", ".motion-subtitle", ".motion-duration", ".motion-description", ".motion-details-button",
+      ".motion-index-head > span", ".motion-item", ".seasonal-card", ".other-tile", ".rail-hint", ".site-footer > *"
+    ].join(", ");
+    const handoffGroupSelectors = [
+      ".motion-index-head > span, .motion-item, .seasonal-card, .other-tile, .rail-hint, .site-footer > *, .hero-corner",
+      ".motion-current-number, .motion-title-block h3, .motion-subtitle, .motion-duration, .motion-description, .motion-details-button",
+      ".player-frame, .player-progress",
+      ".hero-kicker, .hero-title, .hero-subtitle, .hero-cta, .section-number, .section-heading h2, .seasonal-title-cn, .section-subtitle, .section-intro, .section-note"
+    ];
+    const handoffGroupGap = 80;
+    const handoffLeafStep = 50;
+
+    const clearHandoffLeaves = () => {
+      sections.forEach((section) => {
+        section.querySelectorAll(".is-handoff-leaf").forEach((leaf) => {
+          leaf.classList.remove("is-handoff-leaf");
+          leaf.style.removeProperty("--handoff-delay");
+          leaf.style.removeProperty("--handoff-exit-delay");
+        });
+      });
+    };
+
+    const prepareHandoffLeaves = (oldSection, nextSection, direction) => {
+      clearHandoffLeaves();
+      const preparedGroups = [oldSection, nextSection].map((section) => {
+        if (!section) return;
+        const groups = handoffGroupSelectors.map(() => []);
+        section.querySelectorAll(handoffLeafSelector).forEach((leaf) => {
+          if (leaf.hidden || window.getComputedStyle(leaf).display === "none") return;
+          const groupIndex = handoffGroupSelectors.findIndex((selector) => leaf.matches(selector));
+          if (groupIndex >= 0) groups[groupIndex].push(leaf);
+        });
+        return groups;
+      }).filter(Boolean);
+      let handoffDeadline = 0;
+      preparedGroups.forEach((groups) => {
+        groups.forEach((group, groupIndex) => {
+          group.forEach((leaf, leafIndex) => {
+            const orderedGroup = direction === "forward" ? groupIndex : groups.length - 1 - groupIndex;
+            const orderedLeaf = direction === "forward" ? leafIndex : group.length - 1 - leafIndex;
+            const delay = orderedGroup * handoffGroupGap + orderedLeaf * handoffLeafStep;
+            handoffDeadline = Math.max(handoffDeadline, delay + 210, Math.max(0, delay - 150) + 180);
+            leaf.classList.add("is-handoff-leaf");
+            leaf.style.setProperty("--handoff-delay", `${delay}ms`);
+            leaf.style.setProperty("--handoff-exit-delay", `${Math.max(0, delay - 150)}ms`);
+          });
+        });
+      });
+      return handoffDeadline;
+    };
 
     const sectionIndexFor = (id) => sections.findIndex((section) => section.id === normalizeSectionId(id));
 
@@ -98,6 +152,7 @@
 
     const clearTransition = () => {
       window.clearTimeout(transitionTimer);
+      clearHandoffLeaves();
       document.body.removeAttribute("data-transitioning");
       document.body.removeAttribute("data-transition-direction");
       document.body.removeAttribute("data-transition-target");
@@ -142,6 +197,7 @@
       const oldSection = sections[oldIndex];
       const nextSection = sections[nextIndex];
       const direction = nextIndex > oldIndex ? "forward" : "backward";
+      const handoffDeadline = prepareHandoffLeaves(oldSection, nextSection, direction);
       document.body.dataset.transitionDirection = direction;
       document.body.dataset.transitionTarget = nextSection.id;
       if (motionPreference.matches) {
@@ -155,7 +211,7 @@
       document.body.dataset.transitioning = "content";
       oldSection.classList.add("is-exiting");
       commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
-      transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), transitionDuration);
+      transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), Math.max(transitionDuration, handoffDeadline));
     };
 
     const isEditableTarget = (target) => target?.closest("input, textarea, select, [contenteditable=\"true\"]");
