@@ -77,13 +77,15 @@
       ".motion-index-head > span", ".motion-item", ".seasonal-card", ".other-tile", ".rail-hint", ".site-footer > *"
     ].join(", ");
     const handoffGroupSelectors = [
-      ".motion-index-head > span, .motion-item, .seasonal-card, .other-tile, .rail-hint, .site-footer > *, .hero-corner",
-      ".motion-current-number, .motion-title-block h3, .motion-subtitle, .motion-duration, .motion-description, .motion-details-button",
-      ".player-frame, .player-progress",
-      ".hero-kicker, .hero-title, .hero-subtitle, .hero-cta, .section-number, .section-heading h2, .seasonal-title-cn, .section-subtitle, .section-intro, .section-note"
+      ".hero-kicker, .hero-title, .hero-cta, .hero-corner, .section-number, .section-heading h2, .seasonal-title-cn, .motion-title-block h3",
+      ".player-frame, .player-progress, .seasonal-card, .other-tile",
+      ".hero-subtitle, .section-subtitle, .section-intro, .section-note, .motion-current-number, .motion-subtitle, .motion-duration, .motion-description, .motion-details-button, .motion-index-head > span, .motion-item, .rail-hint",
+      ".site-footer > *"
     ];
-    const handoffGroupGap = 80;
-    const handoffLeafStep = 50;
+    const handoffGroupGap = 40;
+    const handoffLeafStep = 40;
+    const handoffEnterDuration = 440;
+    const handoffExitDuration = 130;
 
     const clearHandoffLeaves = () => {
       sections.forEach((section) => {
@@ -91,6 +93,10 @@
           leaf.classList.remove("is-handoff-leaf");
           leaf.style.removeProperty("--handoff-delay");
           leaf.style.removeProperty("--handoff-exit-delay");
+          leaf.style.removeProperty("--handoff-enter-x");
+          leaf.style.removeProperty("--handoff-enter-y");
+          leaf.style.removeProperty("--handoff-exit-x");
+          leaf.style.removeProperty("--handoff-exit-y");
         });
       });
     };
@@ -111,13 +117,30 @@
       preparedGroups.forEach((groups) => {
         groups.forEach((group, groupIndex) => {
           group.forEach((leaf, leafIndex) => {
-            const orderedGroup = direction === "forward" ? groupIndex : groups.length - 1 - groupIndex;
+            const orderedGroup = groupIndex;
             const orderedLeaf = direction === "forward" ? leafIndex : group.length - 1 - leafIndex;
-            const delay = orderedGroup * handoffGroupGap + orderedLeaf * handoffLeafStep;
-            handoffDeadline = Math.max(handoffDeadline, delay + 210, Math.max(0, delay - 150) + 180);
+            const leafStep = Math.min(handoffLeafStep, 200 / Math.max(1, group.length - 1));
+            const delay = orderedGroup * handoffGroupGap + orderedLeaf * leafStep;
+            const reverse = direction === "backward" ? -1 : 1;
+            let enterX = 28;
+            let enterY = 0;
+            if (leaf.matches(".hero-kicker, .hero-title, .hero-cta, .hero-corner, .section-number, .section-heading h2, .seasonal-title-cn, .motion-title-block h3")) {
+              enterX = -32;
+            } else if (leaf.matches(".player-frame, .player-progress, .seasonal-card, .other-tile")) {
+              enterX = 0;
+              enterY = 46;
+            } else if (leaf.matches(".site-footer > *")) {
+              enterX = 0;
+              enterY = -20;
+            }
+            handoffDeadline = Math.max(handoffDeadline, delay + handoffEnterDuration, handoffExitDuration);
             leaf.classList.add("is-handoff-leaf");
             leaf.style.setProperty("--handoff-delay", `${delay}ms`);
-            leaf.style.setProperty("--handoff-exit-delay", `${Math.max(0, delay - 150)}ms`);
+            leaf.style.setProperty("--handoff-exit-delay", "0ms");
+            leaf.style.setProperty("--handoff-enter-x", `${enterX * reverse}px`);
+            leaf.style.setProperty("--handoff-enter-y", `${enterY * reverse}px`);
+            leaf.style.setProperty("--handoff-exit-x", `${-enterX * reverse}px`);
+            leaf.style.setProperty("--handoff-exit-y", `${-enterY * reverse}px`);
           });
         });
       });
@@ -161,6 +184,7 @@
     const finishTransition = (oldSection, nextSection) => {
       clearTransition();
       oldSection?.classList.remove("is-exiting");
+      oldSection?.classList.remove("is-handoff-hidden");
       nextSection?.classList.remove("is-entering");
       locked = false;
       const queued = queuedNavigation;
@@ -169,7 +193,6 @@
     };
 
     const commit = (oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel) => {
-      oldSection?.classList.add("is-exiting");
       nextSection.classList.add("is-entering");
       activeIndex = nextIndex;
       setActiveA11y(activeIndex);
@@ -210,8 +233,12 @@
 
       document.body.dataset.transitioning = "content";
       oldSection.classList.add("is-exiting");
-      commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
-      transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), Math.max(transitionDuration, handoffDeadline));
+      transitionTimer = window.setTimeout(() => {
+        oldSection.classList.add("is-handoff-hidden");
+        oldSection.classList.remove("is-exiting");
+        commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
+        transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), Math.max(transitionDuration, handoffDeadline));
+      }, handoffExitDuration);
     };
 
     const isEditableTarget = (target) => target?.closest("input, textarea, select, [contenteditable=\"true\"]");

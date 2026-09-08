@@ -276,7 +276,7 @@ main[data-page-track] > section {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 100ms ease, visibility 0s linear 100ms;
+  transition: none;
 }
 
 main[data-page-track] > section[aria-hidden="false"] {
@@ -1496,8 +1496,8 @@ main[data-page-track] > section[aria-hidden="true"] {
   }
 }
 
-/* Content-layer handoff: panels stay in place while local modules exchange
-   in staggered beats. The scan is a line, never a page mask. */
+/* Content-layer handoff: old panels leave before the next panel commits;
+   only individual content leaves move during the handoff. */
 main[data-page-track] > section.is-exiting {
   z-index: 2;
   visibility: visible;
@@ -1514,124 +1514,48 @@ main[data-page-track] > section.is-entering {
   transition: none;
 }
 
-main[data-page-track]::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 5;
-  display: block;
-  height: 2px;
+main[data-page-track] > section.is-handoff-hidden {
+  z-index: 0;
+  visibility: hidden !important;
+  opacity: 0 !important;
   pointer-events: none;
-  content: "";
-  background: linear-gradient(90deg, transparent, var(--red) 18%, var(--red) 82%, transparent);
-  box-shadow: 0 0 13px rgba(214, 64, 45, 0.35);
-  opacity: 0;
-  visibility: hidden;
-}
-
-body[data-transitioning="content"] main[data-page-track]::after {
-  visibility: visible;
-  animation: panel-scan-forward 430ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
-}
-
-body[data-transitioning="content"][data-transition-direction="backward"] main[data-page-track]::after {
-  animation-name: panel-scan-backward;
+  transition: none !important;
 }
 
 main[data-page-track] > section.is-exiting .is-handoff-leaf,
 main[data-page-track] > section.is-entering .is-handoff-leaf {
-  animation-duration: 210ms;
-  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-name: content-handoff-enter;
+  animation-duration: 440ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-delay: var(--handoff-delay, 0ms);
   animation-fill-mode: both;
 }
 
 main[data-page-track] > section.is-exiting .is-handoff-leaf {
-  animation-name: content-handoff-exit-forward;
-  animation-duration: 180ms;
+  animation-name: content-handoff-exit;
+  animation-duration: 130ms;
   animation-delay: var(--handoff-exit-delay, 0ms);
 }
-
-main[data-page-track] > section.is-entering .is-handoff-leaf {
-  animation-name: content-handoff-enter-forward;
+@keyframes content-handoff-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--handoff-enter-x, 0), var(--handoff-enter-y, 0), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-body[data-transition-direction="backward"] main[data-page-track] > section.is-exiting .is-handoff-leaf {
-  animation-name: content-handoff-exit-backward;
-}
-
-body[data-transition-direction="backward"] main[data-page-track] > section.is-entering .is-handoff-leaf {
-  animation-name: content-handoff-enter-backward;
-}
-
-main[data-page-track] > section.is-exiting.hero,
-main[data-page-track] > section.is-exiting.motion-section,
-main[data-page-track] > section.is-exiting.seasonal-section,
-main[data-page-track] > section.is-exiting.other-section {
-  background: transparent;
-}
-
-main[data-page-track] > section.is-exiting .hero-background {
-  animation: handoff-hero-background 180ms ease-out both;
-}
-
-main[data-page-track] > section.is-exiting.motion-section::before,
-main[data-page-track] > section.is-exiting.seasonal-section::before {
-  animation: handoff-dark-texture 180ms ease-out both;
-}
-
-main[data-page-track] > section.is-exiting.other-section::before {
-  animation: handoff-paper-decoration 180ms ease-out both;
-}
-
-@keyframes panel-scan-forward {
-  0% { transform: translateY(calc(100dvh - 2px)); opacity: 0; }
-  12% { opacity: 0.9; }
-  86% { opacity: 0.9; }
-  100% { transform: translateY(-1px); opacity: 0; }
-}
-
-@keyframes panel-scan-backward {
-  0% { transform: translateY(-1px); opacity: 0; }
-  12% { opacity: 0.9; }
-  86% { opacity: 0.9; }
-  100% { transform: translateY(calc(100dvh - 2px)); opacity: 0; }
-}
-
-@keyframes content-handoff-enter-forward {
-  from { clip-path: inset(100% 0 0 0); }
-  to { clip-path: inset(0); }
-}
-
-@keyframes content-handoff-enter-backward {
-  from { clip-path: inset(0 0 100% 0); }
-  to { clip-path: inset(0); }
-}
-
-@keyframes content-handoff-exit-forward {
-  from { clip-path: inset(0); }
-  to { clip-path: inset(0 0 100% 0); }
-}
-
-@keyframes content-handoff-exit-backward {
-  from { clip-path: inset(0); }
-  to { clip-path: inset(100% 0 0 0); }
-}
-
-@keyframes handoff-hero-background {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes handoff-dark-texture {
-  from { opacity: 0.035; }
-  to { opacity: 0; }
-}
-
-@keyframes handoff-paper-decoration {
-  from { opacity: 1; }
-  to { opacity: 0; }
+@keyframes content-handoff-exit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(var(--handoff-exit-x, 0), var(--handoff-exit-y, 0), 0);
+  }
 }
 
 .motion-section,
@@ -2065,11 +1989,6 @@ body[data-active-section="other-works"] .page-switcher {
     opacity: 0;
   }
 
-  main[data-page-track]::after {
-    display: none !important;
-    animation: none !important;
-  }
-
   main[data-page-track] > section.is-entering {
     opacity: 1;
   }
@@ -2077,21 +1996,8 @@ body[data-active-section="other-works"] .page-switcher {
   main[data-page-track] > section.is-entering .is-handoff-leaf,
   main[data-page-track] > section.is-exiting .is-handoff-leaf {
     animation: none !important;
-    clip-path: none !important;
     opacity: 1 !important;
     transform: none !important;
-  }
-
-  main[data-page-track] > section.is-exiting .hero-background,
-  main[data-page-track] > section.is-exiting.other-section::before {
-    animation: none !important;
-    opacity: 1 !important;
-  }
-
-  main[data-page-track] > section.is-exiting.motion-section::before,
-  main[data-page-track] > section.is-exiting.seasonal-section::before {
-    animation: none !important;
-    opacity: 0.035 !important;
   }
 
   .motion-dialog[open] {
