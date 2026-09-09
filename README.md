@@ -6,7 +6,7 @@
 
 - 根页面 `index.html` 是唯一可见作品集页面。
 - 导航只保留 `HOME` 与 `WORK`；`WORK` 指向 `#animation`，旧锚点 `#selected-motion` 会兼容跳转到 `#animation`。
-- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`。正常切换由一块临时页面遮罩完成连续上下扫交接：前进时从下向上覆盖旧页，420ms 满屏后才隐藏旧 panel、提交新 panel，再用 500ms 继续向上揭开；返回方向镜像。遮罩为黑色幕布与 3px 朱砂边缘，仅移动 page track 伪元素，不平移、缩放或过滤整个 panel。遮罩下方仍保留独立内容位移：旧元素约300ms退出，标题从左、说明和详情从右、媒体和卡片从下、页脚从上进入；返回时方向反转。单项进场500ms，组间45ms，密集组的单组错时跨度不超过160ms；清理和输入锁覆盖最后一个元素的完整动画，旧页不会残留在新页上。减少动态效果模式禁用扫屏，只保留100ms交接。滚轮、键盘、按钮、Hash导航和手机纵向切屏、横向rail手势保持原逻辑。
+- 页面采用四个同一视口内绝对叠放的 panel：`Hero → Animation → Seasonal Posters → Other Works + Footer`。正常切换只执行一次页面扫屏：前进时遮罩从下向上用300ms扩展至满屏，返回时从上向下扩展；满屏后才隐藏旧 panel、提交新 panel并结束遮罩，不再执行第二段离场/揭幕。遮罩为目标页同色底幕与3px朱砂边缘，目标为HOME时使用纸色，其余页面使用墨色；只缩放page track伪元素，不平移、缩放或过滤整个panel。扫屏结束后，标题从左、说明和详情从右、媒体和卡片从下、页脚从上独立错峰进入，返回时方向反转。旧元素约180ms退出，单项进场420ms，组间32ms，密集组的单组错时跨度不超过120ms；总交接约0.9秒，旧页不会残留。减少动态效果模式禁用扫屏，只保留100ms交接。滚轮、键盘、按钮、Hash导航和手机纵向切屏、横向rail手势保持原逻辑。
 - `Seasonal Posters` 位于 `#seasonal-posters`，`Other Works` 位于 `#other-works`，末页按钮为 `BACK TO TOP`。
 - 页脚仅包含 `yxyjoyce@qq.com`、`BACK TO TOP` 与 `© 2021 by Xiaoying Ye.`。
 - `additional-works/index.html` 相对路径跳转到 `../index.html#other-works`；`about/index.html` 与 `contact/index.html` 相对路径跳转到 `../index.html#home`，兼容旧链接及 `file://` 直接打开。
@@ -33,7 +33,7 @@ node server.mjs
 
 Hero 背景使用用户确认效果图提取的 ImageGen 成品 `assets/images/hero-rendered-background-v1.png`（1777×885），不再引用旧 `hero-f26-background.png` 透明增强图或旧精卫矩形截图。成品背景直接以 `object-fit: cover` 显示，桌面完整宽幅覆盖，手机以 `object-position: 62% center` 保证主峰可见；不再使用 `multiply`、mask 或明显 blur 重构山形。页面暖米白基准保持为 `#f4efe5`，项目中的原始 GIF、`E:\作品` 素材与旧 F26 派生 PNG 均保留但不写回/不引用。
 Animation 手机端按“标题 → 16:9 播放器 → 紧凑信息 → 缩略图 rail”排布，完整介绍通过原生底部 `dialog` 抽屉查看；Seasonal 桌面约三张完整卡片加下一张露边，手机卡片约 82vw；Other Works 手机卡片约 84vw。桌面窄高度使用 `max-height: 760px` 紧凑规则，末屏页脚与切换按钮各自占位，避免覆盖。
-HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本均为 `?v=20260909-01`。
+HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本均为 `?v=20260909-02`。
 
 ## GitHub Pages 发布副本
 
@@ -47,10 +47,11 @@ HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧�
 - [MDN Scrollbars styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling)：Seasonal/Other 使用原生 `overflow-x: auto` 滚动条，并以红色 thumb 和灰色 track 保持可见对比。
 - [web.dev 动画性能指南](https://web.dev/articles/animations-guide)：采用transform与opacity制作平滑位移动画，避免通过布局属性驱动动画。
 - [MDN `translate3d()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/transform-function/translate3d)：页面遮罩与独立内容位移均使用三维平移，由合成层完成连续移动。
+- [MDN `transform-origin`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform-origin)：以底部或顶部作为遮罩缩放原点，让朱砂边缘只经过视口一次。
 - [MDN `prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion)：确认减少动画偏好应替换或缩短非必要位移，采用不超过 100ms 的无位移淡变。
 - [Android Navigation forward/back transitions](https://developer.android.com/guide/navigation/navigation-3/animate-destinations)：以 forward 与 pop/back 分离的进入/退出方向作为内容层交接的交互依据。
 
-最终不采用 View Transition API、GSAP、WebGL、开场加载页或元素级遮罩式进场。当前方案用单一页面遮罩完成前后页连续上下扫交接，内容元素仍分别平滑位移进入；保留低依赖、离线和 GitHub Pages 运行边界。2026-09-09 已通过本地浏览器逐帧检查前进/返回方向、满屏换页、完成态与控制台错误。
+最终不采用 View Transition API、GSAP、WebGL、开场加载页或元素级遮罩式进场。当前方案只用一次页面覆盖完成前后页交接，遮罩结束后内容元素再分别平滑位移进入；保留低依赖、离线和 GitHub Pages 运行边界。2026-09-09 已通过本地浏览器逐帧检查正向/返回单扫、模块错峰、首页纸色遮罩、完成态与控制台错误。
 
 ## 验证
 

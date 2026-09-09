@@ -1522,9 +1522,10 @@ main[data-page-track] > section.is-handoff-hidden {
   transition: none !important;
 }
 
-/* A short viewport-level sweep keeps the old page present until the next page
-   is committed beneath a fully opaque cover. It is the only whole-viewport
-   movement; panel roots and their content remain in place. */
+/* A one-way viewport-level cover keeps the old page present until the next
+   page is committed beneath a fully opaque cover. It is the only whole-
+   viewport movement; panel roots and their content remain in place. */
+main[data-page-track]::before,
 main[data-page-track]::after {
   position: absolute;
   inset: 0;
@@ -1533,44 +1534,70 @@ main[data-page-track]::after {
   pointer-events: none;
   visibility: hidden;
   opacity: 0;
-  transform: translate3d(0, 100%, 0);
+  transform: scaleY(0);
+  transform-origin: bottom center;
 }
 
+main[data-page-track]::before {
+  z-index: 11;
+  background: transparent;
+  border: 0 solid transparent;
+}
+
+main[data-page-track]::after {
+  z-index: 10;
+  background: var(--ink);
+}
+
+body[data-transitioning="content"] main[data-page-track]::before,
 body[data-transitioning="content"] main[data-page-track]::after {
   visibility: visible;
   opacity: 1;
-  animation-duration: 920ms;
+  animation-duration: 300ms;
   animation-timing-function: linear;
   animation-fill-mode: both;
   will-change: transform;
 }
 
+body[data-transitioning="content"][data-transition-direction="forward"] main[data-page-track]::before,
 body[data-transitioning="content"][data-transition-direction="forward"] main[data-page-track]::after {
-  background: linear-gradient(to bottom, var(--red) 0 3px, var(--ink) 3px 100%);
-  animation-name: page-handoff-sweep-forward;
+  transform-origin: bottom center;
+  animation-name: page-handoff-cover-forward;
 }
 
+body[data-transitioning="content"][data-transition-direction="backward"] main[data-page-track]::before,
 body[data-transitioning="content"][data-transition-direction="backward"] main[data-page-track]::after {
-  background: linear-gradient(to bottom, var(--ink) 0 calc(100% - 3px), var(--red) calc(100% - 3px) 100%);
-  animation-name: page-handoff-sweep-backward;
+  transform-origin: top center;
+  animation-name: page-handoff-cover-backward;
 }
 
-@keyframes page-handoff-sweep-forward {
-  from { transform: translate3d(0, 100%, 0); }
-  45.652% { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(0, -100%, 0); }
+body[data-transitioning="content"] main[data-page-track]::before {
+  border-width: 3px 0 0;
+  border-color: var(--red);
 }
 
-@keyframes page-handoff-sweep-backward {
-  from { transform: translate3d(0, -100%, 0); }
-  45.652% { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(0, 100%, 0); }
+body[data-transitioning="content"][data-transition-target="home"] main[data-page-track]::after {
+  background: var(--paper);
+}
+
+body[data-transitioning="content"][data-transition-direction="backward"] main[data-page-track]::before {
+  border-width: 0 0 3px;
+}
+
+@keyframes page-handoff-cover-forward {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes page-handoff-cover-backward {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
 }
 
 main[data-page-track] > section.is-exiting .is-handoff-leaf,
 main[data-page-track] > section.is-entering .is-handoff-leaf {
   animation-name: content-handoff-enter;
-  animation-duration: 500ms;
+  animation-duration: 420ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-delay: var(--handoff-delay, 0ms);
   animation-fill-mode: both;
@@ -1578,7 +1605,7 @@ main[data-page-track] > section.is-entering .is-handoff-leaf {
 
 main[data-page-track] > section.is-exiting .is-handoff-leaf {
   animation-name: content-handoff-exit;
-  animation-duration: 300ms;
+  animation-duration: 180ms;
   animation-delay: var(--handoff-exit-delay, 0ms);
 }
 @keyframes content-handoff-enter {
@@ -2022,6 +2049,7 @@ body[data-active-section="other-works"] .page-switcher {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  main[data-page-track]::before,
   main[data-page-track]::after {
     display: none !important;
     animation: none !important;

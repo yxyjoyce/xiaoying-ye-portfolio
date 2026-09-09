@@ -60,8 +60,7 @@
     if (sections.length === 0 || !nextButton || !nextLabel || !pageCount || !track) return;
 
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handoffCoverDuration = 420;
-    const handoffRevealDuration = 500;
+    const handoffCoverDuration = 300;
     const horizontalRailSelector = ".motion-list, .other-rail, .other-grid, .seasonal-rail";
     const initialHash = normalizeSectionId(window.location.hash.slice(1));
     const initialIndex = sections.findIndex((section) => section.id === initialHash);
@@ -83,10 +82,10 @@
       ".hero-subtitle, .section-subtitle, .section-intro, .section-note, .motion-current-number, .motion-subtitle, .motion-duration, .motion-description, .motion-details-button, .motion-index-head > span, .motion-item, .rail-hint",
       ".site-footer > *"
     ];
-    const handoffGroupGap = 45;
-    const handoffLeafSpan = 160;
-    const handoffEnterDuration = 500;
-    const handoffExitDuration = 300;
+    const handoffGroupGap = 32;
+    const handoffLeafSpan = 120;
+    const handoffEnterDuration = 420;
+    const handoffExitDuration = 180;
 
     const clearHandoffLeaves = () => {
       sections.forEach((section) => {
@@ -238,7 +237,8 @@
         oldSection.classList.add("is-handoff-hidden");
         oldSection.classList.remove("is-exiting");
         commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
-        transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), Math.max(handoffRevealDuration, handoffDeadline));
+        document.body.removeAttribute("data-transitioning");
+        transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), handoffDeadline);
       }, handoffCoverDuration);
     };
 
