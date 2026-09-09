@@ -1522,10 +1522,55 @@ main[data-page-track] > section.is-handoff-hidden {
   transition: none !important;
 }
 
+/* A short viewport-level sweep keeps the old page present until the next page
+   is committed beneath a fully opaque cover. It is the only whole-viewport
+   movement; panel roots and their content remain in place. */
+main[data-page-track]::after {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  content: "";
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translate3d(0, 100%, 0);
+}
+
+body[data-transitioning="content"] main[data-page-track]::after {
+  visibility: visible;
+  opacity: 1;
+  animation-duration: 920ms;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  will-change: transform;
+}
+
+body[data-transitioning="content"][data-transition-direction="forward"] main[data-page-track]::after {
+  background: linear-gradient(to bottom, var(--red) 0 3px, var(--ink) 3px 100%);
+  animation-name: page-handoff-sweep-forward;
+}
+
+body[data-transitioning="content"][data-transition-direction="backward"] main[data-page-track]::after {
+  background: linear-gradient(to bottom, var(--ink) 0 calc(100% - 3px), var(--red) calc(100% - 3px) 100%);
+  animation-name: page-handoff-sweep-backward;
+}
+
+@keyframes page-handoff-sweep-forward {
+  from { transform: translate3d(0, 100%, 0); }
+  45.652% { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -100%, 0); }
+}
+
+@keyframes page-handoff-sweep-backward {
+  from { transform: translate3d(0, -100%, 0); }
+  45.652% { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 100%, 0); }
+}
+
 main[data-page-track] > section.is-exiting .is-handoff-leaf,
 main[data-page-track] > section.is-entering .is-handoff-leaf {
   animation-name: content-handoff-enter;
-  animation-duration: 440ms;
+  animation-duration: 500ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-delay: var(--handoff-delay, 0ms);
   animation-fill-mode: both;
@@ -1533,7 +1578,7 @@ main[data-page-track] > section.is-entering .is-handoff-leaf {
 
 main[data-page-track] > section.is-exiting .is-handoff-leaf {
   animation-name: content-handoff-exit;
-  animation-duration: 130ms;
+  animation-duration: 300ms;
   animation-delay: var(--handoff-exit-delay, 0ms);
 }
 @keyframes content-handoff-enter {
@@ -1977,6 +2022,11 @@ body[data-active-section="other-works"] .page-switcher {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  main[data-page-track]::after {
+    display: none !important;
+    animation: none !important;
+  }
+
   main[data-page-track] > section,
   main[data-page-track] > section.is-entering,
   main[data-page-track] > section.is-exiting {

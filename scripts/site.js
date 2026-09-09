@@ -60,7 +60,8 @@
     if (sections.length === 0 || !nextButton || !nextLabel || !pageCount || !track) return;
 
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const transitionDuration = 520;
+    const handoffCoverDuration = 420;
+    const handoffRevealDuration = 500;
     const horizontalRailSelector = ".motion-list, .other-rail, .other-grid, .seasonal-rail";
     const initialHash = normalizeSectionId(window.location.hash.slice(1));
     const initialIndex = sections.findIndex((section) => section.id === initialHash);
@@ -82,10 +83,10 @@
       ".hero-subtitle, .section-subtitle, .section-intro, .section-note, .motion-current-number, .motion-subtitle, .motion-duration, .motion-description, .motion-details-button, .motion-index-head > span, .motion-item, .rail-hint",
       ".site-footer > *"
     ];
-    const handoffGroupGap = 40;
-    const handoffLeafStep = 40;
-    const handoffEnterDuration = 440;
-    const handoffExitDuration = 130;
+    const handoffGroupGap = 45;
+    const handoffLeafSpan = 160;
+    const handoffEnterDuration = 500;
+    const handoffExitDuration = 300;
 
     const clearHandoffLeaves = () => {
       sections.forEach((section) => {
@@ -119,7 +120,7 @@
           group.forEach((leaf, leafIndex) => {
             const orderedGroup = groupIndex;
             const orderedLeaf = direction === "forward" ? leafIndex : group.length - 1 - leafIndex;
-            const leafStep = Math.min(handoffLeafStep, 200 / Math.max(1, group.length - 1));
+            const leafStep = Math.min(40, handoffLeafSpan / Math.max(1, group.length - 1));
             const delay = orderedGroup * handoffGroupGap + orderedLeaf * leafStep;
             const reverse = direction === "backward" ? -1 : 1;
             let enterX = 28;
@@ -237,8 +238,8 @@
         oldSection.classList.add("is-handoff-hidden");
         oldSection.classList.remove("is-exiting");
         commit(oldSection, nextSection, nextIndex, direction, writeHistory, focusPanel);
-        transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), Math.max(transitionDuration, handoffDeadline));
-      }, handoffExitDuration);
+        transitionTimer = window.setTimeout(() => finishTransition(oldSection, nextSection), Math.max(handoffRevealDuration, handoffDeadline));
+      }, handoffCoverDuration);
     };
 
     const isEditableTarget = (target) => target?.closest("input, textarea, select, [contenteditable=\"true\"]");
