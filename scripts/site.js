@@ -73,13 +73,13 @@
       ".hero-kicker", ".hero-title", ".hero-subtitle", ".hero-cta", ".hero-corner",
       ".section-number", ".section-heading h2", ".seasonal-title-cn", ".section-subtitle", ".section-intro", ".section-note",
       ".player-frame", ".player-progress",
-      ".motion-current-number", ".motion-title-block h3", ".motion-subtitle", ".motion-duration", ".motion-description", ".motion-details-button",
+      ".motion-details-divider", ".motion-current-number", ".motion-title-block h3", ".motion-subtitle", ".motion-duration", ".motion-description", ".motion-details-button",
       ".motion-index-head > span", ".motion-item", ".seasonal-card", ".other-tile", ".rail-hint", ".site-footer > *"
     ].join(", ");
     const handoffGroupSelectors = [
       ".hero-kicker, .hero-title, .hero-cta, .hero-corner, .section-number, .section-heading h2, .seasonal-title-cn, .motion-title-block h3",
       ".player-frame, .player-progress, .seasonal-card, .other-tile",
-      ".hero-subtitle, .section-subtitle, .section-intro, .section-note, .motion-current-number, .motion-subtitle, .motion-duration, .motion-description, .motion-details-button, .motion-index-head > span, .motion-item, .rail-hint",
+      ".hero-subtitle, .section-subtitle, .section-intro, .section-note, .motion-details-divider, .motion-current-number, .motion-subtitle, .motion-duration, .motion-description, .motion-details-button, .motion-index-head > span, .motion-item, .rail-hint",
       ".site-footer > *"
     ];
     const handoffGroupGap = 32;

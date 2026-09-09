@@ -32,8 +32,8 @@ node server.mjs
 五个节气 GIF 来自已授权的只读路径 `E:\BaiduSyncdisk\集团\1.媒体宣传\节气海报\...`，源文件未修改。派生文件位于 `assets/seasonal/`，使用 ASCII 名称 `solar-jingzhe`、`solar-dashu`、`solar-liqiu`、`solar-chushu`、`solar-bailu`，编码为无音频 H.264 `yuv420p`、`faststart` MP4，并提取同名 PNG 首帧海报。每个 MP4 均不超过 25 MiB，最长边不超过 1080px；当前最大文件约 11.91 MiB。
 
 Hero 背景使用用户确认效果图提取的 ImageGen 成品 `assets/images/hero-rendered-background-v1.png`（1777×885），不再引用旧 `hero-f26-background.png` 透明增强图或旧精卫矩形截图。成品背景直接以 `object-fit: cover` 显示，桌面完整宽幅覆盖，手机以 `object-position: 62% center` 保证主峰可见；不再使用 `multiply`、mask 或明显 blur 重构山形。页面暖米白基准保持为 `#f4efe5`，项目中的原始 GIF、`E:\作品` 素材与旧 F26 派生 PNG 均保留但不写回/不引用。
-Animation 手机端按“标题 → 16:9 播放器 → 紧凑信息 → 缩略图 rail”排布，完整介绍通过原生底部 `dialog` 抽屉查看；Seasonal 桌面约三张完整卡片加下一张露边，手机卡片约 82vw；Other Works 手机卡片约 84vw。桌面窄高度使用 `max-height: 760px` 紧凑规则，末屏页脚与切换按钮各自占位，避免覆盖。
-HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本均为 `?v=20260909-02`。
+Animation 手机端按“标题 → 16:9 播放器 → 紧凑信息 → 缩略图 rail”排布，完整介绍通过原生底部 `dialog` 抽屉查看；播放器下方的详情分隔线是独立的无语义装饰叶元素，会与详情内容一起参与切屏错峰；Seasonal 桌面约三张完整卡片加下一张露边，手机卡片约 82vw；Other Works 手机卡片约 84vw。桌面窄高度使用 `max-height: 760px` 紧凑规则，末屏页脚与切换按钮各自占位，避免覆盖。
+HTML 为变更后的 CSS 与 JavaScript 使用版本查询参数主动绕过旧缓存；当前 CSS/JavaScript 版本均为 `?v=20260909-03`。
 
 ## GitHub Pages 发布副本
 

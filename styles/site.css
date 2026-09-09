@@ -655,15 +655,22 @@ main[data-page-track] > section[aria-hidden="true"] {
   text-align: right;
 }
 
+.motion-details-divider {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 1px;
+  margin-top: 18px;
+  background: var(--line-dark);
+}
+
 .motion-details {
   display: grid;
   flex: 1 1 auto;
   grid-template-columns: minmax(0, 1fr) auto;
   align-content: start;
   gap: 14px 22px;
-  margin-top: 18px;
+  margin-top: 0;
   padding-top: 15px;
-  border-top: 1px solid var(--line-dark);
 }
 
 .motion-title-block {
@@ -1331,8 +1338,12 @@ main[data-page-track] > section[aria-hidden="true"] {
   .motion-details {
     grid-template-columns: minmax(0, 1fr);
     gap: 7px;
-    margin-top: 8px;
+    margin-top: 0;
     padding-top: 9px;
+  }
+
+  .motion-details-divider {
+    margin-top: 8px;
   }
 
   .motion-duration {
@@ -1861,8 +1872,12 @@ body[data-active-section="other-works"] .page-switcher {
   .motion-details {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 5px 12px;
-    margin-top: 7px;
+    margin-top: 0;
     padding-top: 8px;
+  }
+
+  .motion-details-divider {
+    margin-top: 7px;
   }
 
   .motion-title-block {
